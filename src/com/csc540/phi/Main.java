@@ -145,19 +145,37 @@ public class Main {
 
 		        updatePatientHealthSupporters(connection, patient.id);
 		        
-		        while(option <= 7){
-		        	System.out.println("\n1.Edit personal Information\n2.Add diagnosis\n3.Add observation\n4.View alerts\n5.Remove authorized health supporter\n6.Add authorized health supporter\n7.Remove diagnosis\nEnter your choice: ");
+		        while(option <= 8){
+		        	System.out.println("\n1.Edit personal Information\n2.Add diagnosis\n3.Add observation\n4.View alerts\n5.Remove authorized health supporter\n6.Add authorized health supporter\n7.Remove diagnosis\n8.Exit\nEnter your choice: ");
 		        	option = sc.nextInt();
 		        	sc.nextLine();
 		        	if(option == 1){
-		        		System.out.println("Enter new address: ");
-		        		String address = sc.nextLine();
-		        		System.out.println("Enter new name: ");
-		        		String name = sc.nextLine();
-		        		System.out.println("Enter new phone number: ");
-		        		String phone = sc.nextLine();
+		        		int chosen_menu;
+		        		System.out.println("\nChoose the option from menu you would like to update.\n1.Name\n2.Address\n3.Phone Number\nEnter your choice: ");
+		        		chosen_menu = sc.nextInt();
+		        		sc.nextLine();
+		        		switch(chosen_menu){
+		        		case 1:
+			        		System.out.println("Enter new name: ");
+			        		String name = sc.nextLine();
+			        		patient.setName(name);
+			        		break;
+		        		case 2:
+		        			System.out.println("Enter new address: ");
+			        		String address = sc.nextLine();
+			        		patient.setAddress(address);
+			        		break;
+		        		case 3:
+			        		System.out.println("Enter new phone number: ");
+			        		String phone = sc.nextLine();
+			        		patient.setPhone_num(phone);
+			        		break;
+		        		default:
+			        		System.out.println("Invalid Choice");
+		        		}
+		        		
 		        		statement = connection.createStatement();
-		        		query = "update patient p set p.name='" + name + "', p.address='" + address + "', p.phone_num='" + phone + "' where p.id=" + patient.id + "";
+		        		query = "update patient p set p.name='" + patient.getName() + "', p.address='" + patient.getAddress() + "', p.phone_num='" + patient.getPhone_num()+ "' where p.id=" + patient.getId() + "";
 		        		System.out.println(query);
 		        		int rows = statement.executeUpdate(query);
 		        		if(rows > 0){
@@ -167,7 +185,7 @@ public class Main {
 		        		}
 		        		//Update corresponding entry in Health Supporter table as well.
 		        		statement = connection.createStatement();
-		        		query = "update patient p,health_supporter hs,user_info u set hs.name='" + name + "', hs.address='" + address + "', hs.phone_num='" + phone + "' where p.id=" + patient.id + " and p.user_id=u.id and hs.user_id=u.id";
+		        		query = "update patient p,health_supporter hs,user_info u set hs.name='" + patient.getName() + "', hs.address='" + patient.getAddress() + "', hs.phone_num='" + patient.getPhone_num() + "' where p.id=" + patient.getId() + " and p.user_id=u.id and hs.user_id=u.id";
 		        		System.out.println(query);
 		        		rows = statement.executeUpdate(query);
 		        		if(rows > 0){
@@ -305,7 +323,13 @@ public class Main {
 	        		} else if(option == 7){
 	        			removeDiagnosis(connection, patient.id);
 	        		}
-		        }		        
+	        		else{
+	    	        	System.out.println("Exitting...bye bye!!");
+	    	        	System.exit(0);
+	        		}
+		        }
+	        	System.out.println("Invalid choice. Exitting!!!");
+	        	System.exit(0);
 		    } else if(type == 2){
 	        	//Indicates a health supporter has logged in.
 		    	result.close();
@@ -345,7 +369,7 @@ public class Main {
 		        }
 		        
 		        while(option < 6){
-		        	System.out.println("What do you want to do?\n1.Edit personal Information\n2.Add patient diagnosis\n3.Edit patient information\n4.Add patient observation\n5.View alerts");
+		        	System.out.println("What do you want to do?\n1.Edit personal Information\n2.Add patient diagnosis\n3.Edit patient information\n4.Add patient observation\n5.View alerts\n6.Exit");
 		        	option = sc.nextInt();
 		        	sc.nextLine();
 		        	if(option == 1){
@@ -442,6 +466,12 @@ public class Main {
 		        	} else if(option == 5){
 		        		viewHSAlerts();
 		        	}
+		        	else{
+		        		System.out.println("Exitting...bye bye!!");
+		        		System.exit(0);
+		        	}
+		        	System.out.println("Invalid choice. Exitting!!!");
+		        	System.exit(0);
 		        }
 		        connection.close();		    
 	        } else {
@@ -559,15 +589,22 @@ public class Main {
 					break;
 				}
 			}
-			
-			String query = "insert into patient_diagnosis values(" + patId + ", " + diagID + ", '" + new java.sql.Date(Calendar.getInstance().getTimeInMillis()) + "')";
-			System.out.println(query);
-			int rows = stmt.executeUpdate(query);
-			if(rows > 0){
-				System.out.println("New diagnosis added.");
-			} else{
-				System.out.println("Error adding diagnosis.");
-			}			
+			if(diagID == 0)
+			{
+				System.out.println("Sorry.No such Diagnosis exists");
+			}
+			else
+			{
+				String query = "insert into patient_diagnosis values(" + patId + ", " + diagID + ", '" + new java.sql.Date(Calendar.getInstance().getTimeInMillis()) + "')";
+				System.out.println(query);
+				int rows = stmt.executeUpdate(query);
+				if(rows > 0){
+					System.out.println("New diagnosis added.");
+				} else{
+					System.out.println("Error adding diagnosis.");
+				}
+			}
+						
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}		
