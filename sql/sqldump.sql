@@ -1,10 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `phi` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `phi`;
--- MySQL dump 10.13  Distrib 5.7.12, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.15, for Linux (x86_64)
 --
 -- Host: localhost    Database: phi
 -- ------------------------------------------------------
--- Server version	5.7.15-log
+-- Server version	5.7.15-0ubuntu0.16.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -55,7 +53,7 @@ CREATE TABLE `diagnosis` (
   `description` text NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -64,7 +62,7 @@ CREATE TABLE `diagnosis` (
 
 LOCK TABLES `diagnosis` WRITE;
 /*!40000 ALTER TABLE `diagnosis` DISABLE KEYS */;
-INSERT INTO `diagnosis` VALUES (1,'Heart Disease','Heart Disease'),(2,'HIV','HIV'),(3,'Diabetes','Type-II Diabetes'),(4,'SLE','Lupus'),(5,'Cancer','Cancer'),(6,'Lung mass','Lung mass');
+INSERT INTO `diagnosis` VALUES (1,'Heart Disease','Heart Disease'),(2,'HIV','HIV'),(3,'Diabetes','Type-II Diabetes'),(4,'SLE','Lupus'),(5,'Cancer','Cancer'),(6,'Lung mass','Lung mass'),(7,'COPD','COPD');
 /*!40000 ALTER TABLE `diagnosis` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -198,6 +196,7 @@ CREATE TABLE `observation_requirement` (
   `upper_limit` varchar(10) DEFAULT NULL,
   `start_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `required_ind` tinyint(1) DEFAULT '1',
+  `frequency` int(11) DEFAULT NULL,
   KEY `observation_type_id` (`observation_type_id`),
   KEY `obs_subtype_id` (`obs_subtype_id`),
   KEY `hs_id` (`hs_id`),
@@ -502,4 +501,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-10-22 20:02:19
+-- Dump completed on 2016-10-22 20:52:29
