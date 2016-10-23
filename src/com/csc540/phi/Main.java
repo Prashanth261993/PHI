@@ -60,7 +60,7 @@ public class Main {
 			        System.out.println("User information stored");
 				}				
 			} catch(Exception e){
-				System.out.println("Error encountered. Exitting!!!");
+				System.out.println("Error encountered. Exiting!!!");
 				e.printStackTrace();
 				System.exit(0);
 			}
@@ -324,11 +324,11 @@ public class Main {
 	        			removeDiagnosis(connection, patient.id);
 	        		}
 	        		else{
-	    	        	System.out.println("Exitting...bye bye!!");
+	    	        	System.out.println("Exiting...bye bye!!");
 	    	        	System.exit(0);
 	        		}
 		        }
-	        	System.out.println("Invalid choice. Exitting!!!");
+	        	System.out.println("Invalid choice. Exiting!!!");
 	        	System.exit(0);
 		    } else if(type == 2){
 	        	//Indicates a health supporter has logged in.
@@ -467,15 +467,15 @@ public class Main {
 		        		viewHSAlerts();
 		        	}
 		        	else{
-		        		System.out.println("Exitting...bye bye!!");
+		        		System.out.println("Exiting...bye bye!!");
 		        		System.exit(0);
 		        	}
-		        	System.out.println("Invalid choice. Exitting!!!");
+		        	System.out.println("Invalid choice. Exiting!!!");
 		        	System.exit(0);
 		        }
 		        connection.close();		    
 	        } else {
-	        	System.out.println("Invalid choice. Exitting!!!");
+	        	System.out.println("Invalid choice. Exiting!!!");
 	        	System.exit(0);
 	        }
 		} catch (SQLException e) {
