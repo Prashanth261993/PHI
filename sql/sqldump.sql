@@ -30,7 +30,7 @@ CREATE TABLE `blood_pressure` (
   `observation_id` int(11) NOT NULL,
   PRIMARY KEY (`observation_id`),
   CONSTRAINT `blood_pressure_ibfk_1` FOREIGN KEY (`observation_id`) REFERENCES `observation` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -139,7 +139,7 @@ CREATE TABLE `mood` (
   `observation_id` int(11) NOT NULL,
   PRIMARY KEY (`observation_id`),
   CONSTRAINT `mood_ibfk_1` FOREIGN KEY (`observation_id`) REFERENCES `observation` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -169,7 +169,7 @@ CREATE TABLE `observation` (
   KEY `pid` (`pid`),
   CONSTRAINT `observation_ibfk_1` FOREIGN KEY (`observation_type_id`) REFERENCES `observation_type` (`observation_type_id`),
   CONSTRAINT `observation_ibfk_2` FOREIGN KEY (`pid`) REFERENCES `patient` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -208,7 +208,7 @@ CREATE TABLE `observation_requirement` (
   CONSTRAINT `observation_requirement_ibfk_3` FOREIGN KEY (`hs_id`) REFERENCES `health_supporter` (`id`),
   CONSTRAINT `observation_requirement_ibfk_4` FOREIGN KEY (`pid`) REFERENCES `patient` (`id`),
   CONSTRAINT `observation_requirement_ibfk_5` FOREIGN KEY (`diagnosis_id`) REFERENCES `diagnosis` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -235,7 +235,7 @@ CREATE TABLE `observation_sub_type` (
   UNIQUE KEY `name` (`name`),
   KEY `observation_type_id` (`observation_type_id`),
   CONSTRAINT `observation_sub_type_ibfk_1` FOREIGN KEY (`observation_type_id`) REFERENCES `observation_type` (`observation_type_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -261,7 +261,7 @@ CREATE TABLE `observation_type` (
   `metric` varchar(10) NOT NULL,
   PRIMARY KEY (`observation_type_id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -285,7 +285,7 @@ CREATE TABLE `oxygen_saturation` (
   `observation_id` int(11) NOT NULL,
   PRIMARY KEY (`observation_id`),
   CONSTRAINT `oxygen_saturation_ibfk_1` FOREIGN KEY (`observation_id`) REFERENCES `observation` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -309,7 +309,7 @@ CREATE TABLE `pain_intensity` (
   `observation_id` int(11) NOT NULL,
   PRIMARY KEY (`observation_id`),
   CONSTRAINT `pain_intensity_ibfk_1` FOREIGN KEY (`observation_id`) REFERENCES `observation` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -400,7 +400,7 @@ CREATE TABLE `recommended_observations` (
   CONSTRAINT `recommended_observations_ibfk_2` FOREIGN KEY (`observation_type_id`) REFERENCES `observation_type` (`observation_type_id`),
   CONSTRAINT `recommended_observations_ibfk_3` FOREIGN KEY (`subtype_id`) REFERENCES `observation_sub_type` (`obs_subtype_id`),
   CONSTRAINT `recommended_observations_ibfk_4` FOREIGN KEY (`pid`) REFERENCES `patient` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -429,7 +429,7 @@ CREATE TABLE `required_observations` (
   CONSTRAINT `required_observations_ibfk_1` FOREIGN KEY (`diagnosis_id`) REFERENCES `diagnosis` (`id`),
   CONSTRAINT `required_observations_ibfk_2` FOREIGN KEY (`observation_type_id`) REFERENCES `observation_type` (`observation_type_id`),
   CONSTRAINT `required_observations_ibfk_3` FOREIGN KEY (`subtype_id`) REFERENCES `observation_sub_type` (`obs_subtype_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -481,7 +481,7 @@ CREATE TABLE `weight` (
   `observation_id` int(11) NOT NULL,
   PRIMARY KEY (`observation_id`),
   CONSTRAINT `weight_ibfk_1` FOREIGN KEY (`observation_id`) REFERENCES `observation` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
