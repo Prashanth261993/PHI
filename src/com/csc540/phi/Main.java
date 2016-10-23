@@ -13,12 +13,12 @@ import java.util.Scanner;
 
 public class Main {
 	
-	public static UserInformation user_info = new UserInformation();
-	public static ArrayList<Diagnosis> diagnosis = new ArrayList<>();
-	public static ArrayList<Diagnosis> pat_diagnosis = new ArrayList<>();
 	public static Patient patient = new Patient();
 	public static HealthSupporter hs = new HealthSupporter();
-	public static ArrayList<HealthSupporter> pat_hs = new ArrayList<>();//List of health supporters for a patient.
+	public static UserInformation user_info = new UserInformation();//Stores the logged in user's information.
+	public static ArrayList<Diagnosis> diagnosis = new ArrayList<>();//Stores the list of diagnosis defined in the system.
+	public static ArrayList<Diagnosis> pat_diagnosis = new ArrayList<>();//Stores the list of diagnosis a patient is diagnosed with.
+	public static ArrayList<HealthSupporter> pat_hs;//List of health supporters for a patient.
 	public static ArrayList<Patient> hs_pat = new ArrayList<>();//List of patients associated to a health supporter. 
 	public static Scanner sc = new Scanner(System.in);
 	
@@ -26,6 +26,11 @@ public class Main {
 		sc.close();
 	}
 	
+	/*
+	 * Function to handle the login functionality
+	 * @params {Integer} type - Specify to login as a patient or a health supporter
+	 * @params {Connection} connection - SQL Connection object used to query to the database 
+	 */
 	public static void manageLogin(int type, Connection connection){
 		Statement statement;
 		ResultSet result;
@@ -44,7 +49,7 @@ public class Main {
 				result = statement.executeQuery("select * from user_info where username='" + username + "' and password='" + password + "'");
 				
 				if(!result.next()){
-					System.out.println("Username is incorrect. Please try again....");									
+					System.out.println("Username and password combination is incorrect.\nPlease try again....");									
 				} else{
 					loginValid = true;
 			        user_info.setId(result.getInt(1));
@@ -63,10 +68,11 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		String query = "";
+		Connection connection = null;
 		Statement statement;
 		ResultSet result;
-		int option = 2;
+		String query = "";
+		int option = 0;
 		
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
@@ -76,8 +82,7 @@ public class Main {
 			closeResources(sc);
 			return;
 		}
-
-		Connection connection = null;
+		
 		try {
 			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/phi?useSSL=true", "root", "root");
 		} catch (SQLException e) {
@@ -121,7 +126,7 @@ public class Main {
 		        statement = connection.createStatement();
 		        query = "select p.* from patient p, user_info u where u.id=" + user_info.getId() + " and u.id = p.user_id";
 		        result = statement.executeQuery(query);
-		        System.out.println("\nPatient details:");
+		        System.out.println("\nPatient Information:");
 		        if(result.next()){
 		        	patient.setId(result.getInt(1));
 		        	patient.setName(result.getString(2));
@@ -136,56 +141,12 @@ public class Main {
 		        	System.out.println("Address: " + patient.address);
 		        }
 		        
-		        statement = connection.createStatement();
-		        query = "select d.id,d.name,d.description from user_info u,patient p,patient_diagnosis pd, diagnosis d where u.id = " + user_info.getId() + " and p.user_id = u.id and pd.p_id = p.id and pd.d_id = d.id";
-		        result = statement.executeQuery(query);
-		        
-		        if(!result.isBeforeFirst()){
-		        	System.out.println("\nPatient category: Well");
-		        	System.out.println("No diagnosis found.");
-		        } else{
-		        	System.out.println("\nPatient category: Sick");
-		        	System.out.println("List of diagnosis: ");
-		        	
-		        	while(result.next()){
-			        	Diagnosis d = new Diagnosis();
-			        	d.setId(result.getInt(1));
-			        	d.setName(result.getString(2));
-			        	d.setDesc(result.getString(3));
-			        	pat_diagnosis.add(d);
-			        	
-			        	System.out.println(d.getDesc());
-			        }
-		        }
+		        getPatientDiagnosis(connection);
 
-		        statement = connection.createStatement();
-		        query = "select hs.*,hsp.primary_ind,hsp.auth_date from patient p, health_supporter hs, hs_manages_patient hsp where p.id=" + patient.getId() + " and hsp.p_id=p.id and hsp.hs_id=hs.id";
-		        result = statement.executeQuery(query);
+		        updatePatientHealthSupporters(connection, patient.id);
 		        
-		        if(!result.isBeforeFirst()){
-		        	System.out.println("\nNo authorized health supporters found!");
-		        } else{
-		        	System.out.println("\nList of authorized health supporters.");
-		        	while(result.next()){
-			        	HealthSupporter h = new HealthSupporter();
-			        	h.setId(result.getInt(1));
-			        	h.setName(result.getString(2));
-			        	h.setAddress(result.getString(3));
-			        	h.setPhone_num(result.getString(4));
-			        	h.setUser_id(result.getInt(5));
-			        	h.setPrimary_ind(result.getInt(6));
-			        	h.setAuth_date(result.getString(7));
-			        	pat_hs.add(h);
-			        	if(h.primary_ind != 0){
-			        		System.out.println("Primary HS: " + h.name);
-			        	} else {
-			        		System.out.println("Secondary HS: " + h.name);
-			        	}
-			        }
-		        }
-		        
-		        while(option < 6){
-		        	System.out.println("\n1.Edit personal Information\n2.Add diagnosis\n3.Add observation\n4.View alerts\n5..Remove authorized health supporter\n6.Add authorized health supporter\nEnter your choice: ");
+		        while(option <= 7){
+		        	System.out.println("\n1.Edit personal Information\n2.Add diagnosis\n3.Add observation\n4.View alerts\n5.Remove authorized health supporter\n6.Add authorized health supporter\n7.Remove diagnosis\nEnter your choice: ");
 		        	option = sc.nextInt();
 		        	sc.nextLine();
 		        	if(option == 1){
@@ -229,9 +190,10 @@ public class Main {
 		        			boolean found = false;
 		        			int hs_id = 0;
 		        			for(HealthSupporter h: pat_hs){
-		        				if(h.name == hsp){
+		        				if(hsp.compareToIgnoreCase(h.name) == 0){
 		        					found = true;
 		        					hs_id = h.id;
+		        					pat_hs.remove(h);
 		        					break;
 		        				}
 		        			}
@@ -239,16 +201,110 @@ public class Main {
 		        				System.out.println("No such health supporter found.");
 		        			} else{
 		        				statement = connection.createStatement();
-		        				query = "delete from hs_manages_patient hsp where hsp.p_id=" + patient.id + " and hsp.hs_id=" + hs_id + "";
+		        				query = "delete from hs_manages_patient where p_id=" + patient.id + " and hs_id=" + hs_id + "";
+		        				System.out.println(query);
 		        				int rows = statement.executeUpdate(query);
 		        				if(rows > 0){
-		        					System.out.println("Update successful");
+		        					System.out.println("Health Supporter removed successfully");
 		        				} else {
-		        					System.out.println("Update unsuccessful");
+		        					System.out.println("Removal failed.");
 		        				}
 		        			}
 		        		}
-		        	}		        
+		        		updatePatientHealthSupporters(connection, patient.id);
+		        	} else if(option == 6){
+	        			if(pat_hs.size() == 2){
+	        				System.out.println("You already have maximum number of health supporters");	        				
+	        			} else{
+	        				String name = "";
+	        				do{
+	        					System.out.println("Enter name of health supporter to add: ");
+		        				name = sc.nextLine();
+	        				}while(pat_hs.size() == 1 && pat_hs.get(0).name.compareTo(name)==0);        				
+	        				System.out.println("Enter primary indicator: ");
+	        				int primary_ind = Integer.parseInt(sc.nextLine());
+	        				System.out.println("Enter relation to patient: ");
+	        				String rel = sc.nextLine();
+	        				if(pat_hs.size() == 1){
+	        					//If there is already a primary health supporter, then overwrite it to make the new one primary.
+	        					if(primary_ind == 1 && pat_hs.get(0).primary_ind == 1){
+	        						pat_hs.get(0).primary_ind = 0;
+	        						int hs_id = 0;
+	        						statement = connection.createStatement();
+	        						String subquery = "select h.id from health_supporter h where h.name='" + name + "'";
+	        						System.out.println(subquery);
+	        						result = statement.executeQuery(subquery);
+	        						if(!result.next()){
+	        							System.out.println("No such health supporter found.");
+	        						}else{
+	        							hs_id = result.getInt(1);
+	        							
+	        							query = "insert into hs_manages_patient values(" + patient.id + ", " + hs_id + ", " + primary_ind + ", '" + rel + "', '" + new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTimeInMillis()) + "')";
+		        						
+	        							statement = connection.createStatement();
+		        						System.out.println(query);
+		        						int rows = statement.executeUpdate(query);
+		        						if(rows > 0){
+		        							System.out.println("Inserted successfully");
+		        						}else{
+		        							System.out.println("Insertion failed.");
+		        						}
+		        						query = "update hs_manages_patient hs set hs.primary_ind = 0 where hs.p_id = " + patient.id + " and hs.hs_id = " + pat_hs.get(0).id + "";
+		        						statement = connection.createStatement();
+		        						rows = statement.executeUpdate(query);
+		        						if(rows > 0){
+		        							System.out.println("Updated successfully");
+		        						} else{
+		        							System.out.println("Updation unsuccessful");
+		        						}
+	        						}	        						
+	        					}else{
+	        						statement = connection.createStatement();
+	        						String subquery = "select h.id from health_supporter h where h.name='" + name + "'";
+	        						result = statement.executeQuery(subquery);
+	        						if(!result.next()){
+	        							System.out.println("No such health supporter found.");
+	        						}else{
+	        							int hs_id = result.getInt(1);
+	        							//This prevents two health supporters being inserted without each being a primary one.
+	        							if(pat_hs.get(0).primary_ind == 0 && primary_ind == 0){
+	        								primary_ind = 1;
+	        							}
+	        							query = "insert into hs_manages_patient values(" + patient.id + ", " + hs_id + ", " + primary_ind + ", '" + rel + "', '" + new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTimeInMillis()) + "')";
+		        						System.out.println(query);
+		        						statement = connection.createStatement();
+		        						int rows = statement.executeUpdate(query);
+		        						if(rows > 0){
+		        							System.out.println("Inserted successfully");
+		        						}else{
+		        							System.out.println("Insertion failed.");
+		        						}
+	        						}	        						
+	        					}
+	        				}else if(pat_hs.size() == 0){
+	        					statement = connection.createStatement();
+        						String subquery = "select h.id from health_supporter h where h.name='" + name + "'";
+        						result = statement.executeQuery(subquery);
+        						if(!result.next()){
+        							System.out.println("No such health supporter found.");
+        						}else{
+        							int hs_id = result.getInt(1);
+        							query = "insert into hs_manages_patient values(" + patient.id + ", " + hs_id + ", " + primary_ind + ", '" + rel + "', '" + new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTimeInMillis()) + "')";
+	        						System.out.println(query);
+	        						statement = connection.createStatement();
+	        						int rows = statement.executeUpdate(query);
+	        						if(rows > 0){
+	        							System.out.println("Inserted successfully");
+	        						}else{
+	        							System.out.println("Insertion failed.");
+	        						}
+        						}	        	        					
+	        				}
+	        			}
+	        			updatePatientHealthSupporters(connection, patient.id);
+	        		} else if(option == 7){
+	        			removeDiagnosis(connection, patient.id);
+	        		}
 		        }		        
 		    } else if(type == 2){
 	        	//Indicates a health supporter has logged in.
@@ -398,21 +454,99 @@ public class Main {
 		closeResources(sc);
 	}
 
-	private static void viewPatientAlerts() {
-		
-		
+	private static void removeDiagnosis(Connection connection, int id) {
+		if(pat_diagnosis.size() == 0){
+			System.out.println("No diagnosis to remove.");
+		} else{
+			try {
+				Statement stmt = connection.createStatement();
+				int diagID = 0;
+				System.out.println("Enter diagnosis name to remove: ");
+				String name = sc.nextLine();
+				for(Diagnosis d : diagnosis){
+					if(name.compareToIgnoreCase(d.name) == 0){
+						diagID = d.id;
+						break;
+					}
+				}
+				
+				String query = "delete from patient_diagnosis where p_id = " + id + " and d_id = " + diagID;
+				System.out.println(query);
+				int rows = stmt.executeUpdate(query);
+				if(rows > 0){
+					System.out.println("Diagnosis removed successfully.");
+				} else{
+					System.out.println("Error removing diagnosis.");
+				}
+				getPatientDiagnosis(connection);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}				
 	}
 
-	private static void viewHSAlerts() {
-		
-		
+	private static void getPatientDiagnosis(Connection connection) {
+		pat_diagnosis = new ArrayList<>();
+		try{
+			Statement statement = connection.createStatement();
+	        String query = "select d.id,d.name,d.description from user_info u,patient p,patient_diagnosis pd, diagnosis d where u.id = " + user_info.getId() + " and p.user_id = u.id and pd.p_id = p.id and pd.d_id = d.id";
+	        ResultSet result = statement.executeQuery(query);
+	        
+	        if(!result.isBeforeFirst()){
+	        	System.out.println("\nPatient category: Well");
+	        	System.out.println("No diagnosis found.");
+	        } else{
+	        	System.out.println("\nPatient category: Sick");
+	        	System.out.println("List of diagnosis: ");
+	        	
+	        	while(result.next()){
+		        	Diagnosis d = new Diagnosis();
+		        	d.setId(result.getInt(1));
+		        	d.setName(result.getString(2));
+		        	d.setDesc(result.getString(3));
+		        	pat_diagnosis.add(d);
+		        	
+		        	System.out.println("Diagnosis Name: " + d.getName() + " , Diagnosis Description: " + d.getDesc());
+		        }
+	        }	
+		} catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 
-	private static void addPatientObservation() {
-		
-		
+	private static void updatePatientHealthSupporters(Connection connection, int id) {
+		pat_hs = new ArrayList<>();
+		try{
+			Statement statement = connection.createStatement();
+	        String query = "select hs.*,hsp.primary_ind,hsp.auth_date from patient p, health_supporter hs, hs_manages_patient hsp where p.id=" + patient.getId() + " and hsp.p_id=p.id and hsp.hs_id=hs.id";
+	        ResultSet result = statement.executeQuery(query);
+	        
+	        if(!result.isBeforeFirst()){
+	        	System.out.println("\nNo authorized health supporters found!");
+	        } else{
+	        	System.out.println("\nList of authorized health supporters.");
+	        	while(result.next()){
+		        	HealthSupporter h = new HealthSupporter();
+		        	h.setId(result.getInt(1));
+		        	h.setName(result.getString(2));
+		        	h.setAddress(result.getString(3));
+		        	h.setPhone_num(result.getString(4));
+		        	h.setUser_id(result.getInt(5));
+		        	h.setPrimary_ind(result.getInt(6));
+		        	h.setAuth_date(result.getString(7));
+		        	pat_hs.add(h);
+		        	if(h.primary_ind != 0){
+		        		System.out.println("Primary HS: " + h.name);
+		        	} else {
+		        		System.out.println("Secondary HS: " + h.name);
+		        	}
+		        }
+	        }
+		} catch(Exception e){
+			e.printStackTrace();
+		}
 	}
-
+	
 	private static void addDiagnosis(Connection c,int patId) {
 		try {
 			Statement stmt = c.createStatement();
@@ -438,6 +572,21 @@ public class Main {
 			e.printStackTrace();
 		}		
 	}
+
+	private static void viewPatientAlerts() {
+		
+		
+	}
+
+	private static void viewHSAlerts() {
+		
+		
+	}
+
+	private static void addPatientObservation() {
+		
+		
+	}	
 }
 
 
