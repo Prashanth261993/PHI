@@ -125,7 +125,7 @@ public class Patient {
 			e.printStackTrace();
 		}
 	}
-	public void displayRecommendedObservations(Connection connection){
+	public static void displayRecommendedObservations(Connection connection){
 		
 	}
 }

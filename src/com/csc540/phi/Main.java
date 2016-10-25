@@ -427,7 +427,7 @@ public class Main {
 		        	} else if(option == 2){
 		        		addDiagnosis(connection, patient.id);
 		        	} else if(option == 3){
-		        		addPatientObservation();
+		        		addPatientObservation(connection,patient.getId());
 		        	} else if(option == 4){
 		        		viewPatientAlerts();
 		        	} else if(option == 5){
@@ -953,11 +953,19 @@ public class Main {
 				e.printStackTrace();
 			}
 			System.out.println("obsDate entered : "+obs_Date);
-			String query = "Insert into Observation (observation_type_id, pid, observation_date, recorded_date) values (" + choice + "," +patID+",'"+obs_Date+"','" + new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTimeInMillis()) + "')";
+			String query = "Insert into Observation (id, observation_type_id, pid, observation_date, recorded_date) values (" + null + "," + choice + "," +patID+",'"+obs_Date+"','" + new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTimeInMillis()) + "')";
 			System.out.println(query);
-			int obsID = stmt.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+			int rows = stmt.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+			if(rows > 0){
+				System.out.println("New observation added.");
+			} else{
+				System.out.println("Error adding observation.");
+			}
+			ResultSet keys = stmt.getGeneratedKeys();    
+			keys.next();  
+			int obsID = keys.getInt(1);
 			String subquery = "Insert into " + categories.get(choice) + " values (" + value + "," + obsID +")";
-			int rows = stmt.executeUpdate(subquery);
+			rows = stmt.executeUpdate(subquery);
 			if(rows > 0){
 				System.out.println("New observation added.");
 			} else{
