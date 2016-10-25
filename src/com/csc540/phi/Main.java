@@ -147,7 +147,7 @@ public class Main {
 		        updatePatientHealthSupporters(connection, patient.id);
 		        
 		        while(option <= 8){
-		        	System.out.println("\n1.Edit personal Information\n2.Add diagnosis\n3.Add observation\n4.View alerts\n5.Remove authorized health supporter\n6.Add authorized health supporter\n7.Remove diagnosis\n8.Exit\nEnter your choice: ");
+		        	System.out.println("\n1.Edit personal Information\n2.Add diagnosis\n3.Add observation\n4.View alerts\n5.Remove authorized health supporter\n6.Add authorized health supporter\n7.Remove diagnosis\n8.View Health Indicators\n9.Exit\nEnter your choice: ");
 		        	option = sc.nextInt();
 		        	sc.nextLine();
 		        	if(option == 1){
@@ -323,6 +323,10 @@ public class Main {
 	        			updatePatientHealthSupporters(connection, patient.id);
 	        		} else if(option == 7){
 	        			removeDiagnosis(connection, patient.id);
+	        		}
+	        		else if(option == 8){
+	        			patient.displayRequiredObservations(connection);
+	        			patient.displayRecommendedObservations(connection);
 	        		}
 	        		else{
 	    	        	System.out.println("Exiting...bye bye!!");
