@@ -1,10 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `phi` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `phi`;
--- MySQL dump 10.13  Distrib 5.7.12, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.15, for Linux (x86_64)
 --
 -- Host: localhost    Database: phi
 -- ------------------------------------------------------
--- Server version	5.7.15-log
+-- Server version	5.7.15-0ubuntu0.16.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,6 +14,38 @@ USE `phi`;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `alerts`
+--
+
+DROP TABLE IF EXISTS `alerts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `alerts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(20) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `observation_type_id` int(11) NOT NULL,
+  `obs_subtype_id` int(11) NOT NULL,
+  `description` varchar(100) DEFAULT NULL,
+  `alert_date` date DEFAULT NULL,
+  `isCleared` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `observation_type_id` (`observation_type_id`,`obs_subtype_id`),
+  CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`observation_type_id`, `obs_subtype_id`) REFERENCES `observation_sub_type` (`observation_type_id`, `obs_subtype_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `alerts`
+--
+
+LOCK TABLES `alerts` WRITE;
+/*!40000 ALTER TABLE `alerts` DISABLE KEYS */;
+INSERT INTO `alerts` VALUES (1,'Out of limits',1,1,1,'asd',NULL,0),(2,'Out of limits',1,1,1,'asd','2005-05-16',0),(3,'Out of limits',1,1,1,'asd','2016-05-23',0);
+/*!40000 ALTER TABLE `alerts` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `blood_pressure`
@@ -503,14 +533,6 @@ LOCK TABLES `weight` WRITE;
 INSERT INTO `weight` VALUES (180,1),(195,2);
 /*!40000 ALTER TABLE `weight` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping events for database 'phi'
---
-
---
--- Dumping routines for database 'phi'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -521,4 +543,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-10-25 11:46:16
+-- Dump completed on 2016-10-25 15:44:17

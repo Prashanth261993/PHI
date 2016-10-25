@@ -1,6 +1,7 @@
 package com.csc540.phi;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,6 +23,7 @@ public class Main {
 	public static ArrayList<HealthSupporter> pat_hs;//List of health supporters for a patient.
 	public static ArrayList<Patient> hs_pat = new ArrayList<>();//List of patients associated to a health supporter. 
 	public static Scanner sc = new Scanner(System.in);
+	public static Connection conn;
 	
 	public static void closeResources(Scanner sc){
 		sc.close();
@@ -86,6 +88,7 @@ public class Main {
 		
 		try {
 			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/phi?useSSL=true", "root", "root");
+			conn = connection;
 		} catch (SQLException e) {
 			System.out.println("Connection Failed! Check output console");
 			e.printStackTrace();
@@ -615,9 +618,31 @@ public class Main {
 		}		
 	}
 
-	private static void viewPatientAlerts() {
+	private static void viewPatientAlerts() throws SQLException {
 		
-		
+		System.out.println("Alerts: \n");
+		Statement statement = conn.createStatement();
+		int i=1;
+		System.out.println("Alert Date \t Observation Type \t Observation Sub-type  \t Description");
+		ResultSet rs = statement.executeQuery("select * from alerts inner join observation_type using (observation_type_id) inner join observation_sub_type using (observation_type_id,obs_subtype_id) where patient_id = '" + patient.getId() + "' and isCleared = false order by alert_date");
+		while(rs.next())
+		{
+			String description = rs.getString("alerts.description");
+			Date alertDate = rs.getDate("alerts.alert_date");
+			String observationName = rs.getString("observation_type.name");
+			String subTypeName = rs.getString("observation_sub_type.name");
+			
+			
+			System.out.print(i++ + ". " + alertDate + " \t " + observationName);
+			
+			//This denotes that there are no specializations to the observation type
+			if(subTypeName.equals(observationName))
+				System.out.print(" \t \t \t \t ");
+			else
+				System.out.println(" \t \t \t " + subTypeName);
+			
+			System.out.println("\t " + description);
+		}
 	}
 
 	private static void viewHSAlerts() {
