@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Main {
@@ -60,7 +61,7 @@ public class Main {
 			        System.out.println("User information stored");
 				}				
 			} catch(Exception e){
-				System.out.println("Error encountered. Exitting!!!");
+				System.out.println("Error encountered. Exiting!!!");
 				e.printStackTrace();
 				System.exit(0);
 			}
@@ -155,23 +156,23 @@ public class Main {
 		        		chosen_menu = sc.nextInt();
 		        		sc.nextLine();
 		        		switch(chosen_menu){
-		        		case 1:
-			        		System.out.println("Enter new name: ");
-			        		String name = sc.nextLine();
-			        		patient.setName(name);
-			        		break;
-		        		case 2:
-		        			System.out.println("Enter new address: ");
-			        		String address = sc.nextLine();
-			        		patient.setAddress(address);
-			        		break;
-		        		case 3:
-			        		System.out.println("Enter new phone number: ");
-			        		String phone = sc.nextLine();
-			        		patient.setPhone_num(phone);
-			        		break;
-		        		default:
-			        		System.out.println("Invalid Choice");
+			        		case 1:
+				        		System.out.println("Enter new name: ");
+				        		String name = sc.nextLine();
+				        		patient.setName(name);
+				        		break;
+			        		case 2:
+			        			System.out.println("Enter new address: ");
+				        		String address = sc.nextLine();
+				        		patient.setAddress(address);
+				        		break;
+			        		case 3:
+				        		System.out.println("Enter new phone number: ");
+				        		String phone = sc.nextLine();
+				        		patient.setPhone_num(phone);
+				        		break;
+			        		default:
+				        		System.out.println("Invalid Choice");
 		        		}
 		        		
 		        		statement = connection.createStatement();
@@ -324,11 +325,11 @@ public class Main {
 	        			removeDiagnosis(connection, patient.id);
 	        		}
 	        		else{
-	    	        	System.out.println("Exitting...bye bye!!");
+	    	        	System.out.println("Exiting...bye bye!!");
 	    	        	System.exit(0);
 	        		}
 		        }
-	        	System.out.println("Invalid choice. Exitting!!!");
+	        	System.out.println("Invalid choice. Exiting!!!");
 	        	System.exit(0);
 		    } else if(type == 2){
 	        	//Indicates a health supporter has logged in.
@@ -467,15 +468,15 @@ public class Main {
 		        		viewHSAlerts();
 		        	}
 		        	else{
-		        		System.out.println("Exitting...bye bye!!");
+		        		System.out.println("Exiting...bye bye!!");
 		        		System.exit(0);
 		        	}
-		        	System.out.println("Invalid choice. Exitting!!!");
+		        	System.out.println("Invalid choice. Exiting!!!");
 		        	System.exit(0);
 		        }
 		        connection.close();		    
 	        } else {
-	        	System.out.println("Invalid choice. Exitting!!!");
+	        	System.out.println("Invalid choice. Exiting!!!");
 	        	System.exit(0);
 	        }
 		} catch (SQLException e) {
@@ -621,8 +622,35 @@ public class Main {
 	}
 
 	private static void addPatientObservation() {
+		int choice = 0;
+		HashMap<Integer, String> categories = new HashMap<>();
+		categories.put(1,"Weight");
+		categories.put(2,"Blood Pressure");
+		categories.put(3,"Oxygen Saturation");
+		categories.put(4,"Mood");
+		categories.put(5,"Pain");
+		categories.put(6,"Temperature");
 		
+		do{
+			System.out.println("Enter which observation you want to add:\n1.Weight\n2.Blood Pressure\n3.Oxygen Saturation\n4.Pain\n5.Mood\n6.Temperature\n");
+			choice = Integer.parseInt(sc.next());
+		}while(choice < 0 && choice > 6);
 		
+		int value = 0;
+		if(choice == 5){
+			do{
+				System.out.println("Enter the patient mood\n1 - Happy\n2 - Sad \n3 - Neutral: \n");
+				value = Integer.parseInt(sc.next(), 10);
+			} while(value < 0 && value > 3);
+		} else if(choice == 4){
+			do{
+				System.out.println("Enter the pain intensity on scale of 1-10\n");
+				value = Integer.parseInt(sc.next(), 10);
+			} while(value < 0 && value > 3);
+		} else{
+			System.out.println("Enter the value for observation" + categories.get(choice) + ": \n");
+			value = sc.nextInt();
+		}		
 	}	
 }
 
