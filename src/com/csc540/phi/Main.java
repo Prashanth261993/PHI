@@ -21,7 +21,8 @@ public class Main {
 	public static ArrayList<Diagnosis> diagnosis = new ArrayList<>();//Stores the list of diagnosis defined in the system.
 	public static ArrayList<Diagnosis> pat_diagnosis = new ArrayList<>();//Stores the list of diagnosis a patient is diagnosed with.
 	public static ArrayList<HealthSupporter> pat_hs;//List of health supporters for a patient.
-	public static ArrayList<Patient> hs_pat = new ArrayList<>();//List of patients associated to a health supporter. 
+	public static ArrayList<Patient> hs_pat = new ArrayList<>();//List of patients associated to a health supporter.
+	public static ArrayList<ObservationType> all_observation_types = new ArrayList<>();
 	public static Scanner sc = new Scanner(System.in);
 	public static Connection conn;
 
@@ -373,6 +374,7 @@ public class Main {
 				}
 
 		        updatePatientHealthSupporters(connection, patient.id);
+		        loadObservationType(connection);
 		        
 		        while(option <= 8){
 		        	System.out.println("\n1.Edit personal Information\n2.Add diagnosis\n3.Add observation\n4.View alerts\n5.Remove authorized health supporter\n6.Add authorized health supporter\n7.Remove diagnosis\n8.View Health Indicators\n9.Exit\nEnter your choice: ");
@@ -873,6 +875,39 @@ public class Main {
 	private static void viewHSAlerts() {
 
 
+	}
+	
+	private static void loadObservationType(Connection c){
+		try{
+			Statement statement = c.createStatement();
+			ResultSet observation_type_result,observation_sub_type_result; 
+			String query = "select * from observation_sub_type";
+			observation_sub_type_result = statement.executeQuery(query);
+			while(observation_sub_type_result.next()){
+				ObservationType ot = new ObservationType();
+				ot.setId(observation_sub_type_result.getInt(1));
+				ot.setName(observation_sub_type_result.getString(2));
+				ot.setSubTypeId(observation_sub_type_result.getInt(3));
+				
+				all_observation_types.add(ot);
+				
+			}
+			query = "select * from observation_type";
+			Statement statement2 = c.createStatement();
+			observation_type_result = statement2.executeQuery(query);
+			while(observation_type_result.next()){
+				for(ObservationType ot: all_observation_types){
+					if(ot.getId() == observation_type_result.getInt(1)){
+						ot.setDesc(observation_type_result.getString(3));
+						ot.setMetric(observation_type_result.getString(4));
+					}
+				}
+			}
+			
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		
 	}
 
 	private static void addPatientObservation(Connection c, int patID) {

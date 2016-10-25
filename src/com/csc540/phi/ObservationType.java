@@ -5,7 +5,7 @@ public class ObservationType {
 	private String name;
 	private String desc;
 	private String metric;
-	private int sub_type;
+	private int sub_type_id;
 	
 	public int getId() {
 		return id;
@@ -13,27 +13,16 @@ public class ObservationType {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public String getName() {
-		return this.getName();
+	public int getSubTypeId() {
+		return sub_type_id;
 	}
-	public void setName() {
-		String name = "";
-		
-		if(this.id == 1)
-			name = "Weight";
-		else if(this.id == 2 && this.sub_type == 1)
-			name = "Systolic BP";
-		else if(this.id == 2 && this.sub_type == 2)
-			name = "Diastolic BP";
-		else if(this.id == 3)
-			name = "SpO2";
-		else if(this.id == 4)
-			name = "Pain";
-		else if(this.id == 5)
-			name = "Mood";
-		else if(this.id == 6)
-			name = "Temperature";
-		
+	public void setSubTypeId(int id) {
+		this.sub_type_id = id;
+	}
+	public String getName() {
+		return this.name;
+	}
+	public void setName( String name) {
 		this.name = name;
 	}
 	public String getDesc() {

@@ -15,7 +15,7 @@ public class Patient {
 	public String gender;
 	public String phone_num;
 	public int user_id;
-	public ArrayList<Diagnosis> diagnosis;
+	public ArrayList<Diagnosis> diagnosis = new ArrayList<>();
 	
 	public int getId() {
 		return id;
@@ -83,28 +83,42 @@ public class Patient {
 			Statement statement;
 			ResultSet result;
 			statement = connection.createStatement();
-			ArrayList<ObservationType> patient_observations = new ArrayList<ObservationType>();
-			ArrayList<Integer> observation_type_ids = new ArrayList<Integer>();  
-			ArrayList<Integer> observation_sub_type_ids = new ArrayList<Integer>();  
 			
-	        String query = "select or.* from observation_requirement or, patient_diagnosis pd where pd.p_id =" + this.getId()+ "and or.diagnosis_id = pd.d_id";
+	        String query = "select o.* from observation_requirement o where o.hs_id is NULL and o.pid is NULL and o.diagnosis_id IN (select d_id from patient_diagnosis where p_id = "+ this.getId() +")";
 	        result = statement.executeQuery(query);
 	        
 	        this.setPatientDiagnosis(connection);
-	        System.out.println("Required Observations: ");
+	        System.out.println("Required Observations: \n");
 	        if(this.diagnosis.isEmpty()){
 	        	System.out.println("No diagnosis exists");
 	        }
 	        else{
 		        while(result.next()){
-		        	observation_type_ids.add(result.getInt(1));
-		        	observation_sub_type_ids.add(result.getInt(1));
-		        	String sql = "select ot.* from observation_type ot where ot.observation_type_id IN [" + String.join(",", observation_type_ids.toArray(new String[1]))+ "]";
-		        	statement.executeQuery(sql);
+		        	for(ObservationType ot: Main.all_observation_types){
+		        		if(ot.getId() == result.getInt(1) && ot.getSubTypeId() == result.getInt(2)){
+		        			String diagnosis_name = "";
+		        			for(Diagnosis d: this.diagnosis){
+		        				if(d.getId() == result.getInt(5)){
+		        					diagnosis_name = d.getName();
+		        				}
+		        			}
+		        			String tail_output = "";
+		        			if(result.getString(6) != null)
+		        				tail_output += "\n Lower limit: "+ result.getString(6);
+		        			if(result.getString(7) != null)
+		        				tail_output += "\n Upper limit: "+ result.getString(7);
+		        			if(result.getBoolean(9))
+		        				tail_output += "\n Status: Mandatory";
+		        			else
+		        				tail_output += "\n Status: Optional";
+		        			
+		        			System.out.println("Name:  "+ ot.getName()+ "\nDescription:  " + ot.getDesc()+
+		        					"\nDiagnosis: "+ diagnosis_name + "\nFrequency:  " + result.getInt(10) + 
+		        					" days" + tail_output);
+		        		}
+		        	}
+		        	
 		        }
-		        for(ObservationType o:patient_observations){
-	        		
-	        	}
 	        }
 		}
 		catch (SQLException e) {
