@@ -165,14 +165,18 @@ public class Main {
 		        			if(!found){
 		        				System.out.println("No such health supporter found.");
 		        			} else{
-		        				statement = connection.createStatement();
-		        				query = "delete from hs_manages_patient where p_id=" + patient.id + " and hs_id=" + hs_id + "";
-		        				System.out.println(query);
-		        				int rows = statement.executeUpdate(query);
-		        				if(rows > 0){
-		        					System.out.println("Health Supporter removed successfully");
-		        				} else {
-		        					System.out.println("Removal failed.");
+		        				try{
+		        					statement = connection.createStatement();
+			        				query = "delete from hs_manages_patient where p_id=" + patient.id + " and hs_id=" + hs_id + "";
+			        				System.out.println(query);
+			        				int rows = statement.executeUpdate(query);
+			        				if(rows > 0){
+			        					System.out.println("Health Supporter removed successfully");
+			        				} else {
+			        					System.out.println("Removal failed.");
+			        				}
+		        				}catch(Exception e){
+		        					System.err.println(e.getMessage());
 		        				}
 		        			}
 		        		}

@@ -1,0 +1,14 @@
+DELIMITER $$
+CREATE TRIGGER sick_patient_hs_count_check BEFORE DELETE ON hs_manages_patient
+FOR EACH ROW 
+BEGIN 
+
+declare hs_count int;
+set hs_count = (select count(*) from hs_manages_patient hsp where hsp.p_id = OLD.p_id);
+
+IF hs_count < 2 and (select count(*) from patient_diagnosis pd where pd.p_id = OLD.p_id) > 0 THEN
+  SIGNAL SQLSTATE '12345'
+     SET MESSAGE_TEXT = 'Sick patient should have atleast one health supporter!!!';
+END IF; 
+END$$
+DELIMITER ;

@@ -1,0 +1,10 @@
+DELIMITER $$
+CREATE TRIGGER pat_hs_relation_check BEFORE INSERT ON hs_manages_patient
+FOR EACH ROW 
+BEGIN 
+IF NEW.relation NOT IN ('family','friend','social worker') THEN 
+  SIGNAL SQLSTATE '12345'
+     SET MESSAGE_TEXT = 'Invalid relation between patient and health supporter!!!';
+END IF; 
+END$$
+DELIMITER ;
