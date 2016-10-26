@@ -1,8 +1,10 @@
--- MySQL dump 10.13  Distrib 5.7.15, for Linux (x86_64)
+CREATE DATABASE  IF NOT EXISTS `phi` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `phi`;
+-- MySQL dump 10.13  Distrib 5.7.12, for Win64 (x86_64)
 --
 -- Host: localhost    Database: phi
 -- ------------------------------------------------------
--- Server version	5.7.15-0ubuntu0.16.04.1
+-- Server version	5.7.16-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -178,6 +180,7 @@ CREATE TABLE `mood` (
 
 LOCK TABLES `mood` WRITE;
 /*!40000 ALTER TABLE `mood` DISABLE KEYS */;
+INSERT INTO `mood` VALUES ('1',16);
 /*!40000 ALTER TABLE `mood` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -199,7 +202,7 @@ CREATE TABLE `observation` (
   KEY `pid` (`pid`),
   CONSTRAINT `observation_ibfk_1` FOREIGN KEY (`observation_type_id`) REFERENCES `observation_type` (`observation_type_id`),
   CONSTRAINT `observation_ibfk_2` FOREIGN KEY (`pid`) REFERENCES `patient` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -208,7 +211,7 @@ CREATE TABLE `observation` (
 
 LOCK TABLES `observation` WRITE;
 /*!40000 ALTER TABLE `observation` DISABLE KEYS */;
-INSERT INTO `observation` VALUES (1,1,2,'2016-10-10 00:00:00','2016-10-11 00:00:00'),(2,1,2,'2016-10-17 00:00:00','2016-10-17 00:00:00');
+INSERT INTO `observation` VALUES (1,1,2,'2016-10-10 00:00:00','2016-10-11 00:00:00'),(2,1,2,'2016-10-17 00:00:00','2016-10-17 00:00:00'),(3,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(4,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(5,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(6,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(7,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(8,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(9,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(10,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(11,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(12,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(13,1,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(14,5,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(15,5,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(16,5,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(17,6,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(18,6,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(19,3,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(20,3,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(21,3,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(22,4,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(23,3,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(24,4,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(25,4,1,'2016-01-01 00:00:00','2016-10-25 00:00:00'),(26,6,1,'2016-01-01 00:00:00','2016-10-25 00:00:00');
 /*!40000 ALTER TABLE `observation` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -296,7 +299,7 @@ CREATE TABLE `observation_type` (
   `metric` varchar(10) NOT NULL,
   PRIMARY KEY (`observation_type_id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -330,6 +333,7 @@ CREATE TABLE `oxygen_saturation` (
 
 LOCK TABLES `oxygen_saturation` WRITE;
 /*!40000 ALTER TABLE `oxygen_saturation` DISABLE KEYS */;
+INSERT INTO `oxygen_saturation` VALUES (20,21),(40,23);
 /*!40000 ALTER TABLE `oxygen_saturation` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -354,6 +358,7 @@ CREATE TABLE `pain_intensity` (
 
 LOCK TABLES `pain_intensity` WRITE;
 /*!40000 ALTER TABLE `pain_intensity` DISABLE KEYS */;
+INSERT INTO `pain_intensity` VALUES (5,25);
 /*!40000 ALTER TABLE `pain_intensity` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -384,7 +389,7 @@ CREATE TABLE `patient` (
 
 LOCK TABLES `patient` WRITE;
 /*!40000 ALTER TABLE `patient` DISABLE KEYS */;
-INSERT INTO `patient` VALUES (1,'Jeris Alan','1984-05-05','New Jersey NY','male','919917067',1),(2,'Leonard Hofstader','0000-00-00','Chapel Hill RTP','male','+1(917)9190045',2),(3,'Penny Hofstader','1989-12-25','2500-204 Sacramento','female','+1(919)9170067',3),(4,'Amy Farrahfowler','1989-06-15','2500-204 Sacramento','female','+1(919)9170067',4);
+INSERT INTO `patient` VALUES (1,'P1','1984-05-05','New Jersey NY','male','919917067',1),(2,'Leonard Hofstader','0000-00-00','Chapel Hill RTP','male','+1(917)9190045',2),(3,'Penny Hofstader','1989-12-25','2500-204 Sacramento','female','+1(919)9170067',3),(4,'Amy Farrahfowler','1989-06-15','2500-204 Sacramento','female','+1(919)9170067',4);
 /*!40000 ALTER TABLE `patient` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -482,6 +487,30 @@ INSERT INTO `required_observations` VALUES (0,1,1),(1,1,1),(2,1,1),(1,2,1),(1,2,
 UNLOCK TABLES;
 
 --
+-- Table structure for table `temperature`
+--
+
+DROP TABLE IF EXISTS `temperature`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `temperature` (
+  `value` int(11) NOT NULL,
+  `observation_id` int(11) NOT NULL,
+  PRIMARY KEY (`observation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `temperature`
+--
+
+LOCK TABLES `temperature` WRITE;
+/*!40000 ALTER TABLE `temperature` DISABLE KEYS */;
+INSERT INTO `temperature` VALUES (60,26);
+/*!40000 ALTER TABLE `temperature` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `user_info`
 --
 
@@ -492,8 +521,8 @@ CREATE TABLE `user_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(30) NOT NULL,
   `password` varchar(50) NOT NULL,
-  `sec_question` varchar(100) NOT NULL DEFAULT 'Your favorite color?',
-  `sec_answer` varchar(30) NOT NULL,
+  `sec_question` varchar(100) DEFAULT 'Your favorite color?',
+  `sec_answer` varchar(30) DEFAULT 'RGB',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
@@ -530,9 +559,17 @@ CREATE TABLE `weight` (
 
 LOCK TABLES `weight` WRITE;
 /*!40000 ALTER TABLE `weight` DISABLE KEYS */;
-INSERT INTO `weight` VALUES (180,1),(195,2);
+INSERT INTO `weight` VALUES (180,1),(195,2),(2,12),(50,13);
 /*!40000 ALTER TABLE `weight` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping events for database 'phi'
+--
+
+--
+-- Dumping routines for database 'phi'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -543,8 +580,3 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
-<<<<<<< HEAD
--- Dump completed on 2016-10-25 15:44:17
-=======
--- Dump completed on 2016-10-25 15:44:17
->>>>>>> ab397125f55d164446f1ee3eaadfa53c8632fbca

@@ -1061,10 +1061,10 @@ public class Main {
 			int choice = 0;
 			HashMap<Integer, String> categories = new HashMap<>();
 			categories.put(1,"Weight");
-			categories.put(2,"Blood Pressure");
-			categories.put(3,"Oxygen Saturation");
-			categories.put(4,"Mood");
-			categories.put(5,"Pain");
+			categories.put(2,"Blood_Pressure");
+			categories.put(3,"Oxygen_Saturation");
+			categories.put(4,"Pain_Intensity");
+			categories.put(5,"Mood");
 			categories.put(6,"Temperature");
 
 			do{
@@ -1073,6 +1073,12 @@ public class Main {
 			}while(choice < 0 && choice > 6);
 
 			int value = 0;
+			if(choice == 2){
+				System.out.println("Enter the patient Blood Pressure Systolic and Diastolic values: \n Systolic: ");
+				int systolic = Integer.parseInt(sc.next(), 10);
+				System.out.println("\nDiastolic: ");
+				int diastolic = Integer.parseInt(sc.next(), 10);
+			}
 			if(choice == 5){
 				do{
 					System.out.println("Enter the patient mood\n1 - Happy\n2 - Sad \n3 - Neutral: \n");
@@ -1084,7 +1090,7 @@ public class Main {
 					value = Integer.parseInt(sc.next(), 10);
 				} while(value < 0 && value > 3);
 			} else{
-				System.out.println("Enter the value for observation" + categories.get(choice) + ": \n");
+				System.out.println("Enter the value for patient " + categories.get(choice) + ": \n");
 				value = Integer.parseInt(sc.next());;
 			}
 			System.out.println("Enter the date of observation in the format (yyyy-mm-dd) : \n");
@@ -1109,6 +1115,7 @@ public class Main {
 			keys.next();  
 			int obsID = keys.getInt(1);
 			String subquery = "Insert into " + categories.get(choice) + " values (" + value + "," + obsID +")";
+			System.out.println(categories.get(choice));
 			rows = stmt.executeUpdate(subquery);
 			if(rows > 0){
 				System.out.println("New observation added.");
