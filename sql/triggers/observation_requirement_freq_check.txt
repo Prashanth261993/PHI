@@ -1,0 +1,10 @@
+DELIMITER $$
+CREATE TRIGGER observation_requirement_freq_check BEFORE INSERT ON observation_requirement
+FOR EACH ROW 
+BEGIN 
+IF NEW.frequency < 1 THEN 
+  SIGNAL SQLSTATE '12345'
+     SET MESSAGE_TEXT = 'Frequency cannot be less than 1 day!!!';
+END IF; 
+END$$
+DELIMITER ;

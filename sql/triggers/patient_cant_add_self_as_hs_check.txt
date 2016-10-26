@@ -1,0 +1,11 @@
+DELIMITER $$
+CREATE TRIGGER patient_cant_add_self_as_hs_check BEFORE INSERT ON hs_manages_patient
+FOR EACH ROW 
+BEGIN 
+
+IF (select count(*) from health_supporter hs, patient p, user_info u where hs.user_id = u.id and p.user_id = u.id and p.id = NEW.p_id and hs.id=NEW.hs_id) > 0 THEN
+  SIGNAL SQLSTATE '12345'
+     SET MESSAGE_TEXT = 'Patient cannnot add self as a health supporter!!!';
+END IF; 
+END$$
+DELIMITER ;

@@ -1,0 +1,10 @@
+DELIMITER $$
+CREATE TRIGGER pat_gender BEFORE INSERT ON patient
+FOR EACH ROW 
+BEGIN 
+IF NEW.gender NOT IN ('male','female','others') THEN 
+  SIGNAL SQLSTATE '12345'
+     SET MESSAGE_TEXT = 'Invalid gender!!!';
+END IF; 
+END$$
+DELIMITER ;

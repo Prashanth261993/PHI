@@ -1,0 +1,10 @@
+DELIMITER $$
+CREATE TRIGGER pat_phone_check BEFORE INSERT ON patient
+FOR EACH ROW 
+BEGIN 
+IF (NEW.phone_num REGEXP '^(\\+?[0-9]{1,4}-)?[0-9]{3,10}$' ) = 0 THEN 
+  SIGNAL SQLSTATE '12345'
+     SET MESSAGE_TEXT = 'Wrong phone number format!!!';
+END IF; 
+END$$
+DELIMITER ;

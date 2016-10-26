@@ -1,0 +1,10 @@
+DELIMITER $$
+CREATE TRIGGER pat_hs_primary_ind_check BEFORE INSERT ON hs_manages_patient
+FOR EACH ROW 
+BEGIN 
+IF NEW.primary_ind NOT IN (0,1) THEN 
+  SIGNAL SQLSTATE '12345'
+     SET MESSAGE_TEXT = 'Invalid primary relation(should be either 0 or 1 only)!!!';
+END IF; 
+END$$
+DELIMITER ;
