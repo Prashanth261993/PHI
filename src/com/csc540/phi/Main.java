@@ -3,6 +3,7 @@ package com.csc540.phi;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -341,7 +342,7 @@ public class Main {
 		        		} else{
 		        			System.out.println("Update unsuccessful");
 		        		}
-		        		//Update corresponding entry in Health Supporter table as well.
+		        		//Update corresponding entry in patient table as well.
 		        		statement = connection.createStatement();
 		        		query = "update patient p,health_supporter hs,user_info u set p.name='" + name + "', p.address='" + address + "', p.phone_num='" + phone + "' where hs.id=" + hs.id + " and hs.user_id=u.id and p.user_id=u.id";
 		        		System.out.println(query);
@@ -399,20 +400,40 @@ public class Main {
 			        		String name = sc.nextLine();
 			        		System.out.println("Enter new phone number: ");
 			        		String phone = sc.nextLine();
-			        		System.out.println("Enter new DOB: ");
-			        		String dob = sc.next();
-			        		SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-			        		java.sql.Date bday = new java.sql.Date(Calendar.getInstance().getTimeInMillis());
+			        		System.out.println("Enter new DOB(yyyy-MM-dd format): ");
+			        		String dob = sc.nextLine();
+			        		java.util.Date dt = new java.util.Date();
 			        		try {
-								bday.setTime(fmt.parse(dob).getTime());
-							} catch (ParseException e) {
-								e.printStackTrace();
+								dt = new SimpleDateFormat("yyyy-MM-dd").parse(dob);
+							} catch (ParseException e1) {
+								e1.printStackTrace();
 							}
-
-			        		statement = connection.createStatement();
-			        		query = "update patient p set p.dob = " + bday + " and p.name='" + name + "', p.address='" + address + "', p.phone_num='" + phone + "' where p.id=" + patID + "";
+			        		
+			        		System.out.println(dt.getTime());
+			        		java.sql.Date sqlDate = new java.sql.Date(dt.getTime());
+			        		
+			        		query = "update patient p set p.dob = ? ,p.name=? ,p.address = ? ,p.phone_num=? where p.id=?";
+			        		PreparedStatement pst = connection.prepareStatement(query);
+			        		
+			        		pst.setDate(1, sqlDate);
+			        		pst.setString(2, name);
+			        		pst.setString(3, address);
+			        		pst.setString(4, phone);
+			        		pst.setInt(5, patID);
+			        		
 			        		System.out.println(query);
-			        		int rows = statement.executeUpdate(query);
+			        		int rows = pst.executeUpdate();
+			        		if(rows > 0){
+			        			System.out.println("Update patient successful");
+			        		} else{
+			        			System.out.println("Update ptaient unsuccessful");
+			        		}
+			        		
+			        		//Update entry in HS table as well.
+			        		statement = connection.createStatement();
+			        		query = "update health_supporter hs,patient p,user_info u set hs.name='" + name + "', hs.address='" + address + "', hs.phone_num='" + phone + "' where hs.user_id= u.id and p.user_id=u.id and p.id=" + patID + "";
+			        		System.out.println(query);
+			        		rows = statement.executeUpdate(query);
 			        		if(rows > 0){
 			        			System.out.println("Update successful");
 			        		} else{
