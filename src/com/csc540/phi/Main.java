@@ -23,51 +23,6 @@ public class Main {
 	public static ArrayList<Patient> hs_pat = new ArrayList<>();//List of patients associated to a health supporter. 
 	public static Scanner sc = new Scanner(System.in);
 	
-	public static void closeResources(Scanner sc){
-		sc.close();
-	}
-	
-	/*
-	 * Function to handle the login functionality
-	 * @params {Integer} type - Specify to login as a patient or a health supporter
-	 * @params {Connection} connection - SQL Connection object used to query to the database 
-	 */
-	public static void manageLogin(int type, Connection connection){
-		Statement statement;
-		ResultSet result;
-		boolean loginValid = false;
-		
-		while(loginValid == false){
-			try{
-				System.out.println("Please enter your login credentials: ");
-				System.out.println("Username: ");
-				String username = sc.next();
-				
-				System.out.println("Password: ");
-				String password = sc.next();
-				
-				statement = connection.createStatement();
-				result = statement.executeQuery("select * from user_info where username='" + username + "' and password='" + password + "'");
-				
-				if(!result.next()){
-					System.out.println("Username and password combination is incorrect.\nPlease try again....");									
-				} else{
-					loginValid = true;
-			        user_info.setId(result.getInt(1));
-			        user_info.setUsername(result.getString(2));
-			        user_info.setPassword(result.getString(3));
-			        user_info.setSecQuestion(result.getString(4));
-			        user_info.setSecAnswer(result.getString(5));	
-			        System.out.println("User information stored");
-				}				
-			} catch(Exception e){
-				System.out.println("Error encountered. Exiting!!!");
-				e.printStackTrace();
-				System.exit(0);
-			}
-		}		
-	}
-	
 	public static void main(String[] args) {
 		Connection connection = null;
 		Statement statement;
@@ -98,51 +53,35 @@ public class Main {
 		} else {
 			System.out.println("Failed to connect to the database!");
 		}
-		
+		int type;
 		try {
-			System.out.println("Enter 1 to login as Patient or 2 as Health Supporter: ");
-			int type = sc.nextInt();
+			System.out.println("****************Welcome to PHI application***************");
+			//So lag as user does not select correct entry keep asking him choose correct option.
+			do{
+				System.out.println("\n1 - Login as Patient\n2 - Login as Health Supporter \n3 - Sign Up as new user\nEnter your choice: ");
+				type = sc.nextInt();
+			} while(type < 1 && type > 3);
 			
+			
+			if(type == 3){
+				manageSignUp(connection);				
+			}
+			//Once sign up is done, ask user to login as patient or HS.
+			if(type == 3){
+				do{
+					System.out.println("\n1 - Login as Patient\n2 - Login as Health Supporter\nEnter your choice: ");
+					type = sc.nextInt();
+				}while(type < 1 && type > 2);				
+			}
 			manageLogin(type, connection);
 			
-			statement = connection.createStatement();
-			query = "select * from diagnosis";
-			result = statement.executeQuery(query);
-			if(!result.isBeforeFirst()){
-				System.out.println("System does not have any diagnosis defined.");
-			} else{
-				System.out.println("List of system defined diagnosis.");
-				while(result.next()){
-					Diagnosis d = new Diagnosis();
-					d.setId(result.getInt(1));
-					d.setName(result.getString(2));
-					d.setDesc(result.getString(3));
-					diagnosis.add(d);
-					System.out.println(d.desc);
-				}
-			}
+			displaySystemDiagnosis(connection);
 			
 			if(type == 1){
 	        	//Indicates a patient has logged in.
-		        statement = connection.createStatement();
-		        query = "select p.* from patient p, user_info u where u.id=" + user_info.getId() + " and u.id = p.user_id";
-		        result = statement.executeQuery(query);
-		        System.out.println("\nPatient Information:");
-		        if(result.next()){
-		        	patient.setId(result.getInt(1));
-		        	patient.setName(result.getString(2));
-		        	patient.setDOB(result.getString(3));
-		        	patient.setAddress(result.getString(4));
-		        	patient.setGender(result.getString(5));
-		        	patient.setPhone_num(result.getString(6));
-		        	
-		        	System.out.println("Name: " + patient.name);
-		        	System.out.println("DOB: " + patient.DOB);
-		        	System.out.println("Gender: " + patient.gender);
-		        	System.out.println("Address: " + patient.address);
-		        }
+		        patient = patient.displayAndGetPatientInfo(connection,user_info.id);
 		        
-		        getPatientDiagnosis(connection);
+		        pat_diagnosis = patient.getPatientDiagnosis(connection,user_info.id);
 
 		        updatePatientHealthSupporters(connection, patient.id);
 		        
@@ -332,13 +271,10 @@ public class Main {
 	    	        	System.out.println("Exiting...bye bye!!");
 	    	        	System.exit(0);
 	        		}
-		        }
-	        	System.out.println("Invalid choice. Exiting!!!");
-	        	System.exit(0);
+		        }	        	
 		    } else if(type == 2){
 	        	//Indicates a health supporter has logged in.
-		    	result.close();
-	        	Statement stmt = connection.createStatement();
+		    	Statement stmt = connection.createStatement();
 		        query = "select hs.* from health_supporter hs, user_info u where u.id=" + user_info.getId() + " and u.id = hs.user_id";
 		        result = stmt.executeQuery(query);
 		        if(result.next()){
@@ -347,6 +283,7 @@ public class Main {
 		        	hs.setAddress(result.getString(3));
 		        	hs.setPhone_num(result.getString(4));
 		        	hs.setUser_id(result.getInt(5));
+		        	System.out.println("\nHealth Supporter Information");
 		        	System.out.println("H_S Name: " + hs.name);
 		        	System.out.println("H_S Address: " + hs.address);
 		        	System.out.println("H_S Phone: " + hs.phone_num);
@@ -404,23 +341,27 @@ public class Main {
 		        			System.out.println("Update unsuccessful");
 		        		}
 		        	} else if(option == 2){
-		        		int patID = 0;
-		        		while(patID == 0){
-			        		System.out.println("Enter the authorized patient name you want to modify: ");
-			        		String name = sc.nextLine();
-			        		for(Patient p : hs_pat){
-			        			if(p.name.compareTo(name) == 0){
-			        				patID = p.id;
-			        				break;
-			        			}
+		        		if(hs_pat.size() == 0){
+		        			System.out.println("You have no authorized patients.");
+		        		} else{
+			        		int patID = 0;
+			        		while(patID == 0){
+				        		System.out.println("Enter the authorized patient name you want to modify: ");
+				        		String name = sc.nextLine();
+				        		for(Patient p : hs_pat){
+				        			if(p.name.compareTo(name) == 0){
+				        				patID = p.id;
+				        				break;
+				        			}
+				        		}
+				        		if(patID == 0){
+				        			System.out.println("No such patients found. Please try again!!!");
+				        		} else{
+				        			break;
+				        		}
 			        		}
-			        		if(patID == 0){
-			        			System.out.println("No such patients found. Please try again!!!");
-			        		} else{
-			        			break;
-			        		}
+			        		addDiagnosis(connection,patID);
 		        		}
-		        		addDiagnosis(connection,patID);
 		        	} else if(option == 3){
 		        		if(hs_pat.size() == 0){
 		        			System.out.println("You have no authorized patients.");
@@ -474,9 +415,7 @@ public class Main {
 		        	else{
 		        		System.out.println("Exiting...bye bye!!");
 		        		System.exit(0);
-		        	}
-		        	System.out.println("Invalid choice. Exiting!!!");
-		        	System.exit(0);
+		        	}		        
 		        }
 		        connection.close();		    
 	        } else {
@@ -487,6 +426,209 @@ public class Main {
 			e.printStackTrace();
 		}
 		closeResources(sc);
+	}
+	
+	private static void displaySystemDiagnosis(Connection connection) {
+		try{
+			Statement statement = connection.createStatement();
+			String query = "select * from diagnosis";
+			ResultSet result = statement.executeQuery(query);
+			if(!result.isBeforeFirst()){
+				System.out.println("\nSystem does not have any diagnosis defined.");
+			} else{
+				System.out.println("\nList of system defined diagnosis.");
+				while(result.next()){
+					Diagnosis d = new Diagnosis();
+					d.setId(result.getInt(1));
+					d.setName(result.getString(2));
+					d.setDesc(result.getString(3));
+					diagnosis.add(d);
+					System.out.println(d.desc);
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}				
+	}
+
+	/*
+	 * Function to handle the login functionality
+	 * @params {Integer} type - Specify to login as a patient or a health supporter
+	 * @params {Connection} connection - SQL Connection object used to query to the database 
+	 */
+	public static void manageLogin(int type, Connection connection){
+		Statement statement;
+		ResultSet result;
+		boolean loginValid = false;
+		
+		while(loginValid == false){
+			try{
+				System.out.println("Please enter your login credentials: ");
+				System.out.println("Username: ");
+				String username = sc.next();
+				
+				System.out.println("Password: ");
+				String password = sc.next();
+				
+				statement = connection.createStatement();
+				//While querying check if the user exists as a patient or a health supporter too as someone should not login as a patient if they are only a health supporter.
+				if(type == 1){
+					result = statement.executeQuery("select * from user_info u,patient p where p.user_id = u.id and u.username='" + username + "' and u.password='" + password + "'");
+				}else{
+					result = statement.executeQuery("select * from user_info u,health_supporter hs where hs.user_id = u.id and u.username='" + username + "' and u.password='" + password + "'");
+				}
+				
+				if(!result.next()){
+					System.out.println("Username and password combination is incorrect.\nPlease try again....");									
+				} else{
+					loginValid = true;
+			        user_info.setId(result.getInt(1));
+			        user_info.setUsername(result.getString(2));
+			        user_info.setPassword(result.getString(3));
+			        user_info.setSecQuestion(result.getString(4));
+			        user_info.setSecAnswer(result.getString(5));	
+			        System.out.println("User information stored");
+				}				
+			} catch(Exception e){
+				System.out.println("Error encountered. Exiting!!!");
+				e.printStackTrace();
+				System.exit(0);
+			}
+		}		
+	}
+
+	private static void manageSignUp(Connection connection) {
+		int option = 0;
+		boolean validUsername = false;
+		String username = "";
+		String password = "";
+		String query = "select max(p.id),max(hs.id),max(u.id) from patient p,health_supporter hs,user_info u";
+		Statement st;
+		ResultSet result;
+		int rows, maxPID = 0, maxHSID = 0, maxUID = 0;
+		
+		try{
+			st = connection.createStatement();
+			result = st.executeQuery(query);
+			if(result.next()){
+				maxPID = result.getInt(1);
+				maxHSID = result.getInt(2);
+				maxUID = result.getInt(3);
+			}
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+				
+		try{
+			do{
+				System.out.println("\nEnter preferred username: ");
+				username = sc.next();
+				st = connection.createStatement();
+				query = "select * from user_info u where u.username = '" + username + "'";
+				result = st.executeQuery(query);
+				if(result.next()){
+					System.out.println("\nUsername already exists. Please enter new username.");					
+				} else {
+					validUsername = true;
+				}
+			} while(validUsername == false);
+			
+			System.out.println("Enter preferred password: ");
+			password = sc.next();
+			
+			query = "insert into user_info values(" + (maxUID + 1) + ", '" + username + "', '" + password + "', NULL, NULL)";
+			st = connection.createStatement();
+			rows = st.executeUpdate(query);
+			if(rows > 0){
+				System.out.println("Insertion successful.");
+				maxUID = maxUID + 1;
+			} else{
+				System.out.println("Insertion failed.");
+			}
+		} catch(Exception e){
+			e.printStackTrace();
+		}			
+		
+		do{
+			System.out.println("Enter your option to sign up as:\n1. Patient \n2. Health Supporter \n3. Patient and Health Supporter");
+			option = Integer.parseInt(sc.next(), 10);
+			if(option < 1 && option > 3){
+				System.out.println("Invalid option. Please try again.");
+			}
+		} while(option < 1 && option > 3);
+		sc.nextLine();
+		System.out.println("Enter you name: ");
+		String name = sc.nextLine();
+		System.out.println("Enter your gender: ");
+		String gender = sc.nextLine();
+		System.out.println("Enter your address: ");
+		String address = sc.nextLine();
+		System.out.println("Enter your phone number: ");
+		String phone = sc.nextLine();
+		System.out.println("Enter you DOB: ");
+		String dob = sc.nextLine();
+		
+		switch(option){
+			case 1:
+				try{
+					query = "insert into patient values(" + (maxPID + 1) + ", '" + name + "', '" + dob + "', '" + address + "', '" + gender + "', '" + phone + "', " + maxUID + ")";
+					System.out.println(query);
+					st = connection.createStatement();
+					rows = st.executeUpdate(query);
+					if(rows > 0){
+						System.out.println("Insertion into Patient successful.");
+					} else{
+						System.out.println("Insertion into Patient failed.");
+					}
+				} catch(Exception e){
+					e.printStackTrace();
+				}				
+				break;
+			case 2:
+				try{
+					query = "insert into health_supporter values(" + (maxHSID + 1) + ", '" + name + "', '" + address + "', '" + phone + "', " + maxUID + ")";
+					System.out.println(query);
+					st = connection.createStatement();
+					rows = st.executeUpdate(query);
+					if(rows > 0){
+						System.out.println("Insertion into HS successful.");
+					} else{
+						System.out.println("Insertion into HS failed.");
+					}
+				} catch(Exception e){
+					e.printStackTrace();
+				}
+				
+				break;
+			case 3:
+				try{
+					query = "insert into patient values(" + (maxPID + 1) + ", '" + name + "', '" + dob + "', '" + address + "', '" + gender + "', '" + phone + "', " + maxUID + ")";
+					System.out.println(query);
+					st = connection.createStatement();
+					rows = st.executeUpdate(query);
+					if(rows > 0){
+						System.out.println("Insertion into Patient successful.");
+					} else{
+						System.out.println("Insertion into Patient failed.");
+					}
+					query = "insert into health_supporter values(" + (maxHSID + 1) + ", '" + name + "', '" + address + "', '" + phone + "', " + maxUID + ")";
+					System.out.println(query);
+					st = connection.createStatement();
+					rows = st.executeUpdate(query);
+					if(rows > 0){
+						System.out.println("Insertion into HS successful.");
+					} else{
+						System.out.println("Insertion into HS failed.");
+					}
+				} catch(Exception e){
+					e.printStackTrace();
+				}
+				
+				break;
+			default:
+				System.out.println("Incorrect option!!!");
+				break;
+		}		
 	}
 
 	private static void removeDiagnosis(Connection connection, int id) {
@@ -513,40 +655,11 @@ public class Main {
 				} else{
 					System.out.println("Error removing diagnosis.");
 				}
-				getPatientDiagnosis(connection);
+				pat_diagnosis = patient.getPatientDiagnosis(connection, user_info.id);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}				
-	}
-
-	private static void getPatientDiagnosis(Connection connection) {
-		pat_diagnosis = new ArrayList<>();
-		try{
-			Statement statement = connection.createStatement();
-	        String query = "select d.id,d.name,d.description from user_info u,patient p,patient_diagnosis pd, diagnosis d where u.id = " + user_info.getId() + " and p.user_id = u.id and pd.p_id = p.id and pd.d_id = d.id";
-	        ResultSet result = statement.executeQuery(query);
-	        
-	        if(!result.isBeforeFirst()){
-	        	System.out.println("\nPatient category: Well");
-	        	System.out.println("No diagnosis found.");
-	        } else{
-	        	System.out.println("\nPatient category: Sick");
-	        	System.out.println("List of diagnosis: ");
-	        	
-	        	while(result.next()){
-		        	Diagnosis d = new Diagnosis();
-		        	d.setId(result.getInt(1));
-		        	d.setName(result.getString(2));
-		        	d.setDesc(result.getString(3));
-		        	pat_diagnosis.add(d);
-		        	
-		        	System.out.println("Diagnosis Name: " + d.getName() + " , Diagnosis Description: " + d.getDesc());
-		        }
-	        }	
-		} catch(Exception e){
-			e.printStackTrace();
-		}
 	}
 
 	private static void updatePatientHealthSupporters(Connection connection, int id) {
@@ -656,6 +769,11 @@ public class Main {
 			value = sc.nextInt();
 		}		
 	}	
+	
+	public static void closeResources(Scanner sc){
+		sc.close();
+	}
+	
 }
 
 
