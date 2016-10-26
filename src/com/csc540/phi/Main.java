@@ -922,7 +922,7 @@ public class Main {
 		Statement statement = conn.createStatement();
 		int i=1,count=0;
 		System.out.println("   Alert ID \tAlert Date \t Observation Type \t Alert Type");
-		ResultSet rs = statement.executeQuery("select * from alerts inner join observation_type using (observation_type_id) inner join hs_manages_patient on(alerts.patient_id = hs_manages_patient.p_id) where hs_manages_patient.hs_id = '" + patient.getId() + "' order by alert_date");
+		ResultSet rs = statement.executeQuery("select * from alerts inner join observation_type using (observation_type_id) inner join hs_manages_patient on(alerts.patient_id = hs_manages_patient.p_id) where hs_manages_patient.hs_id = '" + hs.getId() + "' order by alert_date");
 		while(rs.next())
 		{
 			Integer alertId = rs.getInt("id");
