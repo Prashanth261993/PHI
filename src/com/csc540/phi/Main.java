@@ -12,6 +12,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 public class Main {
@@ -93,8 +96,8 @@ public class Main {
 		        loadObservationType(connection);
 		        patient.setPatientHealthSupporters(connection);
 		        
-		        while(option <= 8){
-		        	System.out.println("\n1.Edit personal Information\n2.Add diagnosis\n3.Add observation\n4.View alerts\n5.Remove authorized health supporter\n6.Add authorized health supporter\n7.Remove diagnosis\n8.View Health Indicators\n9.Exit\nEnter your choice: ");
+		        while(option <= 9){
+		        	System.out.println("\n1.Edit personal Information\n2.Add diagnosis\n3.Add observation\n4.View alerts\n5.Remove authorized health supporter\n6.Add authorized health supporter\n7.Remove diagnosis\n8.View Health Indicators\n9.View Observations\n10.Exit\nEnter your choice: ");
 		        	option = sc.nextInt();
 		        	sc.nextLine();
 		        	if(option == 1){
@@ -279,7 +282,9 @@ public class Main {
 	        			patient.displayRequiredObservations(connection);
 	        			patient.displayRecommendedObservations(connection);
 	        		}
-	        		else{
+	        		else if(option == 9){
+	        			viewPatientObservations(connection, patient.id);
+	        		} else{
 	    	        	System.out.println("Exiting...bye bye!!");
 	    	        	System.exit(0);
 	        		}
@@ -322,8 +327,8 @@ public class Main {
 			        }
 		        }
 		        
-		        while(option < 6){
-		        	System.out.println("What do you want to do?\n1.Edit personal Information\n2.Add patient diagnosis\n3.Edit patient information\n4.Add patient observation\n5.View alerts\n6.Exit");
+		        while(option < 7){
+		        	System.out.println("What do you want to do?\n1.Edit personal Information\n2.Add patient diagnosis\n3.Edit patient information\n4.Add patient observation\n5.View alerts\n6.View Patient Observations\n7.Exit");
 		        	option = sc.nextInt();
 		        	sc.nextLine();
 		        	if(option == 1){
@@ -441,11 +446,52 @@ public class Main {
 			        		}
 		        		}		        		
 		        	} else if(option == 4){
-		        		addPatientObservation(connection, type);
+		        		if(hs_pat.size() == 0){
+		        			System.out.println("You have no authorized patients.");
+		        		} else{
+		        			int patID = 0;
+			        		while(patID == 0){
+				        		System.out.println("Enter the authorized patient name whose observations you want to view: ");
+				        		String name = sc.nextLine();
+				        		for(Patient p : hs_pat){
+				        			if(p.name.compareTo(name) == 0){
+				        				patID = p.id;
+				        				break;
+				        			}
+				        		}
+				        		if(patID == 0){
+				        			System.out.println("No such authorized patients found. Please try again!!!");
+				        		} else{
+				        			break;
+				        		}
+			        		}
+			        		addPatientObservation(connection, patID);
+		        		}		        		
 		        	} else if(option == 5){
 		        		viewHSAlerts();
-		        	}
-		        	else{
+		        	} else if(option == 6){
+		        		if(hs_pat.size() == 0){
+		        			System.out.println("You have no authorized patients.");
+		        		} else{
+		        			int patID = 0;
+			        		while(patID == 0){
+				        		System.out.println("Enter the authorized patient name whose observations you want to view: ");
+				        		String name = sc.nextLine();
+				        		for(Patient p : hs_pat){
+				        			if(p.name.compareTo(name) == 0){
+				        				patID = p.id;
+				        				break;
+				        			}
+				        		}
+				        		if(patID == 0){
+				        			System.out.println("No such authorized patients found. Please try again!!!");
+				        		} else{
+				        			break;
+				        		}
+			        		}
+			        		viewPatientObservations(connection, patID);
+		        		}
+		        	} else{
 		        		System.out.println("Exiting...bye bye!!");
 		        		System.exit(0);
 		        	}		        
@@ -461,6 +507,52 @@ public class Main {
 		closeResources(sc);
 	}
 	
+	private static void viewPatientObservations(Connection connection, int id) {
+		Statement statement;
+		ResultSet result;
+		String query;
+		
+		Map<String,Integer> categories = new HashMap<>();
+		categories.put("Weight",1);
+		categories.put("Blood_Pressure",2);
+		categories.put("Oxygen_Saturation",3);
+		categories.put("Pain_Intensity",4);
+		categories.put("Mood",5);
+		categories.put("Temperature",6);
+		
+		Map<Integer,String> mood = new HashMap<>();
+		mood.put(1, "Happy");
+		mood.put(2, "Neutral");
+		mood.put(3, "Sad");
+		
+		Iterator<Entry<String, Integer>> entries = categories.entrySet().iterator();
+		while(entries.hasNext()){
+			Map.Entry<String, Integer> entry = entries.next();
+			String table = entry.getKey();
+			Integer value = entry.getValue();
+			if(table.compareTo("Blood_Pressure")!=0){
+				query = "select ot.name,ot.metric,p.name,concat(w.value,''),o.observation_date,o.recorded_date from observation o,observation_type ot,patient p," + table + " w where o.pid=" + id + " and o.observation_type_id=" + value + " and ot.observation_type_id=o.observation_type_id and o.pid=p.id and w.observation_id=o.id";
+			} else{
+				query = "select ot.name,ot.metric,p.name,concat(w.systolic_value,'/',w.diastolic_value),o.observation_date,o.recorded_date from observation o,observation_type ot,patient p," + table + " w where o.pid=" + id + " and o.observation_type_id=" + value + " and ot.observation_type_id=o.observation_type_id and o.pid=p.id and w.observation_id=o.id";
+			}
+			try{
+				statement = connection.createStatement();
+				result = statement.executeQuery(query);
+				if(!result.isBeforeFirst()){
+					System.out.println("\nNo observations found for " + table);
+				}else{
+					System.out.println("\nObservations for " + table);
+					while(result.next()){
+						String str = (table == "Mood") ? mood.get(Integer.parseInt(result.getString(4))) : result.getString(4);
+						System.out.println(str + result.getString(2) + " observed on " + result.getDate(5));
+					}
+				}
+			} catch(Exception e){
+				e.printStackTrace();
+			}
+		}		
+	}
+
 	private static void displaySystemDiagnosis(Connection connection) {
 		try{
 			Statement statement = connection.createStatement();
