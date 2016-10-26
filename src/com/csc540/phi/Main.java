@@ -795,6 +795,23 @@ public class Main {
 		System.out.println("Alerts: \n");
 		Statement statement = conn.createStatement();
 		int i=1;
+		System.out.println("Alert Date \t Observation Type");
+		ResultSet rs = statement.executeQuery("select * from alerts inner join observation_type using (observation_type_id) inner join observation_sub_type using (observation_type_id,obs_subtype_id) where patient_id = '" + patient.getId() + "' and isCleared = false order by alert_date");
+		while(rs.next())
+		{
+			Date alertDate = rs.getDate("alerts.alert_date");
+			String observationName = rs.getString("observation_type.name");
+			
+			System.out.print(i++ + ". " + alertDate + " \t " + observationName);
+			
+		}
+	}
+
+	private static void viewHSAlerts() throws SQLException{
+
+		System.out.println("Alerts: \n");
+		Statement statement = conn.createStatement();
+		int i=1;
 		System.out.println("Alert Date \t Observation Type \t Observation Sub-type  \t Description");
 		ResultSet rs = statement.executeQuery("select * from alerts inner join observation_type using (observation_type_id) inner join observation_sub_type using (observation_type_id,obs_subtype_id) where patient_id = '" + patient.getId() + "' and isCleared = false order by alert_date");
 		while(rs.next())
@@ -815,11 +832,6 @@ public class Main {
 			
 			System.out.println("\t " + description);
 		}
-	}
-
-	private static void viewHSAlerts() {
-
-
 	}
 	
 	private static void loadObservationType(Connection c){

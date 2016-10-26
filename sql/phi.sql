@@ -27,9 +27,7 @@ CREATE TABLE `alerts` (
   `type` varchar(20) NOT NULL,
   `patient_id` int(11) NOT NULL,
   `observation_type_id` int(11) DEFAULT NULL,
-  `description` varchar(100) DEFAULT NULL,
   `alert_date` date DEFAULT NULL,
-  `isCleared` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `observation_type_id` (`observation_type_id`),
   CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`observation_type_id`) REFERENCES `observation` (`observation_type_id`)
@@ -42,7 +40,7 @@ CREATE TABLE `alerts` (
 
 LOCK TABLES `alerts` WRITE;
 /*!40000 ALTER TABLE `alerts` DISABLE KEYS */;
-INSERT INTO `alerts` VALUES (1,'Out of limits',1,NULL,'asd',NULL,0),(2,'Out of limits',1,NULL,'asd','2005-05-16',0),(3,'Out of limits',1,NULL,'asd','2016-05-23',0);
+INSERT INTO `alerts` VALUES (1,'Out of limits',1,NULL,NULL),(2,'Out of limits',1,NULL,'2005-05-16'),(3,'Out of limits',1,NULL,'2016-05-23');
 /*!40000 ALTER TABLE `alerts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -577,7 +575,7 @@ DELIMITER ;;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;;
 /*!50003 SET @saved_time_zone      = @@time_zone */ ;;
 /*!50003 SET time_zone             = 'SYSTEM' */ ;;
-/*!50106 CREATE*/ /*!50117 DEFINER=`root`@`localhost`*/ /*!50106 EVENT `lowAlerts` ON SCHEDULE EVERY 1 DAY STARTS '2016-10-26 13:54:05' ON COMPLETION NOT PRESERVE ENABLE DO CALL createLowActivityAlerts() */ ;;
+/*!50106 CREATE*/ /*!50117 DEFINER=`root`@`localhost`*/ /*!50106 EVENT `lowAlerts` ON SCHEDULE EVERY 1 DAY STARTS '2016-10-26 14:06:54' ON COMPLETION NOT PRESERVE ENABLE DO CALL createLowActivityAlerts() */ ;;
 /*!50003 SET time_zone             = @saved_time_zone */ ;;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;;
@@ -618,7 +616,7 @@ BEGIN
             IF bDone = 1 THEN
 				LEAVE add_alerts1;
 			END IF;
-			INSERT INTO alerts VALUES(NULL,'Low Activity',var2,var3,NULL,CURDATE(),0);
+			INSERT INTO alerts VALUES(NULL,'Low Activity',var2,var3,CURDATE());
 		END LOOP add_alerts1;
 		CLOSE curs;
 	END;
@@ -640,7 +638,7 @@ BEGIN
             IF bDone = 1 THEN
 				LEAVE add_alerts;
 			END IF;
-			INSERT INTO alerts VALUES(NULL,'Low Activity',var2,var3,NULL,CURDATE(),0);
+			INSERT INTO alerts VALUES(NULL,'Low Activity',var2,var3,CURDATE());
 		END LOOP add_alerts;
 		CLOSE curs2;
 	END;
@@ -661,4 +659,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-10-26 13:54:35
+-- Dump completed on 2016-10-26 14:06:59
