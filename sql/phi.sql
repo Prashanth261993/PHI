@@ -1,10 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `phi` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `phi`;
--- MySQL dump 10.13  Distrib 5.7.12, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.16, for Linux (x86_64)
 --
 -- Host: localhost    Database: phi
 -- ------------------------------------------------------
--- Server version	5.7.16-log
+-- Server version	5.7.16-0ubuntu0.16.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -564,12 +562,70 @@ INSERT INTO `weight` VALUES (180,1),(195,2),(2,12),(50,13);
 UNLOCK TABLES;
 
 --
--- Dumping events for database 'phi'
---
-
---
 -- Dumping routines for database 'phi'
 --
+/*!50003 DROP PROCEDURE IF EXISTS `createLowActivityAlert` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `createLowActivityAlert`()
+BEGIN
+	IF ( Select count(*) from observation inner join patient_diagnosis on (observation.pid = patient_diagnosis.p_id) inner join observation_requirement on (observation.observation_type_id = observation_requirement.observation_type_id and observation.pid = observation_requirement.pid and patient_diagnosis.d_id = observation_requirement.diagnosis_id ) where id in (select o.id from observation o left join observation o2 on o.observation_type_id = o2.observation_type_id and o.observation_date < o2.observation_date where o2.observation_date IS NULL) and datediff(CURDATE(), observation_date + frequency) >= alert_threshold) > 0 THEN
+	BEGIN
+		DECLARE var1 INT;
+		DECLARE var2 INT;
+		DECLARE var3 INT;
+		DECLARE bDone INT;
+		DECLARE curs CURSOR FOR Select id, observation.pid, observation.observation_type_id  from observation inner join patient_diagnosis on (observation.pid = patient_diagnosis.p_id) inner join observation_requirement on (observation.observation_type_id = observation_requirement.observation_type_id and observation.pid = observation_requirement.pid and patient_diagnosis.d_id = observation_requirement.diagnosis_id ) where id in (select o.id from observation o left join observation o2 on o.observation_type_id = o2.observation_type_id and o.observation_date < o2.observation_date where o2.observation_date IS NULL) and datediff(CURDATE(), observation_date + frequency) >= alert_threshold;
+		DECLARE CONTINUE HANDLER FOR NOT FOUND SET bDone = 1;
+
+		OPEN curs;
+
+		SET bDone = 0;
+		add_alerts1: LOOP
+			FETCH curs INTO var1, var2, var3;
+            IF bDone = 1 THEN
+				LEAVE add_alerts1;
+			END IF;
+			INSERT INTO alerts VALUES(NULL,'Low Activity',var2,var3,NULL,CURDATE(),0);
+		END LOOP add_alerts1;
+		CLOSE curs;
+	END;
+	END IF;
+	IF (Select count(*) from observation inner join patient_diagnosis on (observation.pid = patient_diagnosis.p_id) inner join observation_requirement on (observation.observation_type_id = observation_requirement.observation_type_id and patient_diagnosis.d_id = observation_requirement.diagnosis_id ) where id in (select o.id from observation o left join observation o2 on o.observation_type_id = o2.observation_type_id and o.pid = o2.pid and o.observation_date < o2.observation_date where o2.observation_date IS NULL) and datediff(CURDATE(), observation_date + frequency) >= alert_threshold and id not in (Select id from observation inner join patient_diagnosis on (observation.pid = patient_diagnosis.p_id) inner join observation_requirement on (observation.observation_type_id = observation_requirement.observation_type_id and patient_diagnosis.d_id = observation_requirement.diagnosis_id ) where id in (select o.id from observation o left join observation o2 on o.observation_type_id = o2.observation_type_id and o.pid = o2.pid and o.observation_date < o2.observation_date where o2.observation_date IS NULL) and datediff(CURDATE(), observation_date + frequency) >= alert_threshold group by id, observation.pid, observation.observation_type_id, observation_requirement.diagnosis_id having count(*) > 1)) THEN
+	BEGIN
+		DECLARE var1 INT;
+		DECLARE var2 INT;
+		DECLARE var3 INT;
+		DECLARE bDone INT;
+		DECLARE curs2 CURSOR FOR Select id, observation.pid, observation.observation_type_id  from observation inner join patient_diagnosis on (observation.pid = patient_diagnosis.p_id) inner join observation_requirement on (observation.observation_type_id = observation_requirement.observation_type_id and patient_diagnosis.d_id = observation_requirement.diagnosis_id ) where id in (select o.id from observation o left join observation o2 on o.observation_type_id = o2.observation_type_id and o.pid = o2.pid and o.observation_date < o2.observation_date where o2.observation_date IS NULL) and datediff(CURDATE(), observation_date + frequency) >= alert_threshold and id not in (Select id from observation inner join patient_diagnosis on (observation.pid = patient_diagnosis.p_id) inner join observation_requirement on (observation.observation_type_id = observation_requirement.observation_type_id and patient_diagnosis.d_id = observation_requirement.diagnosis_id ) where id in (select o.id from observation o left join observation o2 on o.observation_type_id = o2.observation_type_id and o.pid = o2.pid and o.observation_date < o2.observation_date where o2.observation_date IS NULL) and datediff(CURDATE(), observation_date + frequency) >= alert_threshold group by id, observation.pid, observation.observation_type_id, observation_requirement.diagnosis_id having count(*) > 1);
+		DECLARE CONTINUE HANDLER FOR NOT FOUND SET bDone = 1;
+
+		OPEN curs2;
+
+		SET bDone = 0;
+		add_alerts: LOOP
+			FETCH curs2 INTO var1, var2, var3;
+            IF bDone = 1 THEN
+				LEAVE add_alerts;
+			END IF;
+			INSERT INTO alerts VALUES(NULL,'Low Activity',var2,var3,NULL,CURDATE(),0);
+		END LOOP add_alerts;
+		CLOSE curs2;
+	END;
+	END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -579,3 +635,4 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
