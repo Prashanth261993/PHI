@@ -163,16 +163,39 @@ public class Patient {
 			Statement statement;
 			ResultSet result;
 			statement = connection.createStatement();
-			
-	        String query = "select o.* from observation_requirement o where o.hs_id is NULL and o.pid is NULL and o.diagnosis_id IN (select d_id from patient_diagnosis where p_id = "+ this.getId() +")";
-	        result = statement.executeQuery(query);
-	        
+		
 	        this.setPatientDiagnosis(connection);
 	        System.out.println("Required Observations: \n");
 	        if(this.diagnosis.isEmpty()){
-	        	System.out.println("No diagnosis exists");
+	        	System.out.println("\nNo diagnosis exists");
+	        	System.out.println("\nFor well patient  ");
+	        	
+	        	String q = "select o.* from observation_requirement o where o.diagnosis_id = 0";
+	        	result = statement.executeQuery(q);
+	        	
+	        	while(result.next()){
+	        		for(ObservationType ot: Main.all_observation_types){
+		        		if(ot.getId() == result.getInt(1) && ot.getSubTypeId() == result.getInt(2)){
+		        			
+		        			String tail_output = "";
+		        			if(result.getString(6) != null)
+		        				tail_output += "\n Lower limit: "+ result.getString(6);
+		        			if(result.getString(7) != null)
+		        				tail_output += "\n Upper limit: "+ result.getString(7);
+		        			if(result.getBoolean(9))
+		        				tail_output += "\n Status: Mandatory";
+		        			else
+		        				tail_output += "\n Status: Optional";
+		        			
+		        			System.out.println("\nName:  "+ ot.getName()+ "\nDescription:  " + ot.getDesc()
+		        			+ "\nFrequency:  " + result.getInt(10) + " days" + tail_output);
+		        		}
+		        	}
+	        	}
 	        }
 	        else{
+	        	String query = "select o.* from observation_requirement o where o.hs_id is NULL and o.pid is NULL and o.diagnosis_id IN (select d_id from patient_diagnosis where p_id = "+ this.getId() +")";
+		        result = statement.executeQuery(query);
 		        while(result.next()){
 		        	for(ObservationType ot: Main.all_observation_types){
 		        		if(ot.getId() == result.getInt(1) && ot.getSubTypeId() == result.getInt(2)){

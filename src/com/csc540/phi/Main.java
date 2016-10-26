@@ -469,29 +469,78 @@ public class Main {
 		        		}		        		
 		        	} else if(option == 5){
 		        		viewHSAlerts();
-		        	} else if(option == 6){
-		        		if(hs_pat.size() == 0){
-		        			System.out.println("You have no authorized patients.");
-		        		} else{
-		        			int patID = 0;
-			        		while(patID == 0){
-				        		System.out.println("Enter the authorized patient name whose observations you want to view: ");
-				        		String name = sc.nextLine();
-				        		for(Patient p : hs_pat){
-				        			if(p.name.compareTo(name) == 0){
-				        				patID = p.id;
-				        				break;
-				        			}
-				        		}
-				        		if(patID == 0){
-				        			System.out.println("No such authorized patients found. Please try again!!!");
-				        		} else{
-				        			break;
-				        		}
-			        		}
-			        		viewPatientObservations(connection, patID);
+		        	}
+		        	else if(option == 6){
+		        		int patID = 0, diagID = 0;
+		        		System.out.println("\nEnter the authorized patient name you want to modify: ");
+		        		String name = sc.nextLine();
+		        		Patient selected_patient =new Patient();
+		        		for(Patient p : hs_pat){
+		        			if(p.name.compareTo(name) == 0){
+		        				patID = p.getId();
+		        				patient = p;
+		        				break;
+		        			}
 		        		}
-		        	} else{
+		        		if(patID == 0){
+		        			System.out.println("\nNo such authorized patients found. Please try again!!!");
+		        		}
+		        		else{
+		        			System.out.println("\nEnter diagnosis name: ");
+		        			String diagnosis_name = sc.nextLine();
+		        			selected_patient.setPatientDiagnosis(connection);
+		        			for ( Diagnosis d: selected_patient.diagnosis )
+		        			{
+		        				if(d.getName().compareTo(diagnosis_name) == 0){
+			        				diagID = d.getId();
+			        				break;
+			        			}
+		        			}
+		        			if(diagID == 0){
+		        				System.out.println("\n Sorry this patient does not have the diagnosis you mentioned.");
+		        			}
+		        			else{
+		        				System.out.println("\nEnter observation type: ");
+		        				String observation_type_name = sc.nextLine();
+			        			ObservationType observation_type = new ObservationType();
+			        			int ot_id = 0;
+			        			for(ObservationType ot: all_observation_types){
+			        				if(ot.getName().compareTo(observation_type_name) == 0){
+			        					observation_type = ot;
+			        					ot_id = ot.getId();
+			        					break;
+			        				}
+			        			}
+			        			if(ot_id == 0){
+			        				System.out.println("\n Observation Type does not exists");
+			        			}
+			        			else{
+			        				
+			        				
+			        				System.out.println("\nEnter lower limt: ");
+			        				String lower_limit = sc.nextLine();
+			        				System.out.println("\nEnter upper limt: ");
+			        				String upper_limit = sc.nextLine();
+			        				System.out.println("\nEnter start date: ");
+			        				String start_date = sc.nextLine();
+			        				System.out.println("\nPress 1 if the requirement is mandatory or 0 otherwise: ");
+			        				int required_ind = sc.nextInt();
+			        				System.out.println("\nEnter frequency: ");
+			        				int frequency = sc.nextInt();
+			        				System.out.println("\nEnter alert threshold ");
+			        				int alert_threshold = sc.nextInt();
+			        				
+			        				String insert_query = "insert into observation_requirement values(" + observation_type.getId() + ","+ 
+			        				observation_type.getSubTypeId()+","+ hs.getId()+ "," + patient.getId()+ "," + diagID +"," + lower_limit+ 
+			        				"," + upper_limit + "," +start_date +","+ required_ind +","+ frequency+ ","+alert_threshold +")";
+			        				result = statement.executeQuery(insert_query);
+			        			}
+			        			
+		        			}
+		        		}
+		        		
+		        	}
+		        	else{
 		        		System.out.println("Exiting...bye bye!!");
 		        		System.exit(0);
 		        	}		        
