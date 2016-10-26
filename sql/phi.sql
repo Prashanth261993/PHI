@@ -28,15 +28,14 @@ CREATE TABLE `alerts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` varchar(20) NOT NULL,
   `patient_id` int(11) NOT NULL,
-  `observation_type_id` int(11) NOT NULL,
-  `obs_subtype_id` int(11) NOT NULL,
+  `observation_type_id` int(11) DEFAULT NULL,
   `description` varchar(100) DEFAULT NULL,
   `alert_date` date DEFAULT NULL,
   `isCleared` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `observation_type_id` (`observation_type_id`,`obs_subtype_id`),
-  CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`observation_type_id`, `obs_subtype_id`) REFERENCES `observation_sub_type` (`observation_type_id`, `obs_subtype_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+  KEY `observation_type_id` (`observation_type_id`),
+  CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`observation_type_id`) REFERENCES `observation` (`observation_type_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,7 +44,7 @@ CREATE TABLE `alerts` (
 
 LOCK TABLES `alerts` WRITE;
 /*!40000 ALTER TABLE `alerts` DISABLE KEYS */;
-INSERT INTO `alerts` VALUES (1,'Out of limits',1,1,1,'asd',NULL,0),(2,'Out of limits',1,1,1,'asd','2005-05-16',0),(3,'Out of limits',1,1,1,'asd','2016-05-23',0);
+INSERT INTO `alerts` VALUES (1,'Out of limits',1,NULL,'asd',NULL,0),(2,'Out of limits',1,NULL,'asd','2005-05-16',0),(3,'Out of limits',1,NULL,'asd','2016-05-23',0);
 /*!40000 ALTER TABLE `alerts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -87,7 +86,7 @@ CREATE TABLE `diagnosis` (
   `description` text NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -233,6 +232,7 @@ CREATE TABLE `observation_requirement` (
   `start_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `required_ind` tinyint(1) DEFAULT '1',
   `frequency` int(11) DEFAULT NULL,
+  `alert_threshold` int(11) NOT NULL DEFAULT '1',
   KEY `observation_type_id` (`observation_type_id`),
   KEY `obs_subtype_id` (`obs_subtype_id`),
   KEY `hs_id` (`hs_id`),
@@ -253,7 +253,7 @@ CREATE TABLE `observation_requirement` (
 
 LOCK TABLES `observation_requirement` WRITE;
 /*!40000 ALTER TABLE `observation_requirement` DISABLE KEYS */;
-INSERT INTO `observation_requirement` VALUES (1,1,NULL,NULL,1,120,200,NULL,1,7),(2,1,NULL,NULL,1,140,159,NULL,1,1),(2,2,NULL,NULL,1,90,99,NULL,1,1),(5,5,NULL,NULL,1,1,1,NULL,1,1),(1,1,NULL,NULL,2,120,200,NULL,1,7),(2,1,NULL,NULL,2,NULL,NULL,NULL,1,1),(2,2,NULL,NULL,2,NULL,NULL,NULL,1,1),(4,4,NULL,NULL,2,1,5,NULL,1,1),(3,3,NULL,NULL,7,90,99,NULL,1,1),(6,6,NULL,NULL,7,95,100,NULL,1,1),(1,1,NULL,NULL,0,120,200,NULL,0,7),(1,1,2,2,2,120,190,'2016-10-10 00:00:00',1,7),(2,1,2,2,2,NULL,NULL,'2016-10-10 00:00:00',1,1),(2,2,2,2,2,NULL,NULL,'2016-10-10 00:00:00',1,1),(4,4,2,2,2,1,5,'2016-10-10 00:00:00',1,1);
+INSERT INTO `observation_requirement` VALUES (1,1,NULL,NULL,1,120,200,NULL,1,7,1),(2,1,NULL,NULL,1,140,159,NULL,1,1,1),(2,2,NULL,NULL,1,90,99,NULL,1,1,1),(5,5,NULL,NULL,1,1,1,NULL,1,1,1),(1,1,NULL,NULL,2,120,200,NULL,1,7,1),(2,1,NULL,NULL,2,NULL,NULL,NULL,1,1,1),(2,2,NULL,NULL,2,NULL,NULL,NULL,1,1,1),(4,4,NULL,NULL,2,1,5,NULL,1,1,1),(3,3,NULL,NULL,7,90,99,NULL,1,1,1),(6,6,NULL,NULL,7,95,100,NULL,1,1,1),(1,1,NULL,NULL,0,120,200,NULL,0,7,1),(1,1,2,2,2,120,190,'2016-10-10 00:00:00',1,7,1),(2,1,2,2,2,NULL,NULL,'2016-10-10 00:00:00',1,1,1),(2,2,2,2,2,NULL,NULL,'2016-10-10 00:00:00',1,1,1),(4,4,2,2,2,1,5,'2016-10-10 00:00:00',1,1,1);
 /*!40000 ALTER TABLE `observation_requirement` ENABLE KEYS */;
 UNLOCK TABLES;
 
