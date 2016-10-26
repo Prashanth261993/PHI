@@ -4,7 +4,7 @@ FOR EACH ROW
 BEGIN 
 IF NEW.primary_ind NOT IN (0,1) THEN 
   SIGNAL SQLSTATE '12345'
-     SET MESSAGE_TEXT = 'Invalid primary relation!!!';
+     SET MESSAGE_TEXT = 'Invalid primary relation(should be either 0 or 1 only)!!!';
 END IF; 
 END$$
 DELIMITER ;
