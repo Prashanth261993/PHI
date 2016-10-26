@@ -16,6 +16,7 @@ public class Patient {
 	public String phone_num;
 	public int user_id;
 	public ArrayList<Diagnosis> diagnosis = new ArrayList<>();
+	public ArrayList<HealthSupporter> health_supporters = new ArrayList<>();
 	
 	public int getId() {
 		return id;
@@ -134,6 +135,29 @@ public class Patient {
 			e.printStackTrace();
 		}
 	}
+	public void setPatientHealthSupporters(Connection connection) {
+		try{
+			Statement statement = connection.createStatement();
+			String query = "select hs.*,hsp.primary_ind,hsp.auth_date from patient p, health_supporter hs, hs_manages_patient hsp where p.id=" + this.getId() + " and hsp.p_id=p.id and hsp.hs_id=hs.id";
+			ResultSet result = statement.executeQuery(query);
+
+			
+				System.out.println("\nList of authorized health supporters.");
+				while(result.next()){
+					HealthSupporter h = new HealthSupporter();
+					h.setId(result.getInt(1));
+					h.setName(result.getString(2));
+					h.setAddress(result.getString(3));
+					h.setPhone_num(result.getString(4));
+					h.setUser_id(result.getInt(5));
+					h.setPrimary_ind(result.getInt(6));
+					h.setAuth_date(result.getString(7));
+					this.health_supporters.add(h);
+				}
+			} catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	public void displayRequiredObservations(Connection connection){
 		try{
 			Statement statement;
@@ -168,7 +192,7 @@ public class Patient {
 		        			else
 		        				tail_output += "\n Status: Optional";
 		        			
-		        			System.out.println("Name:  "+ ot.getName()+ "\nDescription:  " + ot.getDesc()+
+		        			System.out.println("\nName:  "+ ot.getName()+ "\nDescription:  " + ot.getDesc()+
 		        					"\nDiagnosis: "+ diagnosis_name + "\nFrequency:  " + result.getInt(10) + 
 		        					" days" + tail_output);
 		        		}
@@ -181,7 +205,50 @@ public class Patient {
 			e.printStackTrace();
 		}
 	}
-	public static void displayRecommendedObservations(Connection connection){
-		
+	public void displayRecommendedObservations(Connection connection){
+		try{
+			Statement statement;
+			ResultSet result;
+			statement = connection.createStatement();
+			String query = "select o.* from observation_requirement o where o.pid=" + this.getId();
+			
+			result = statement.executeQuery(query);
+			System.out.println("\n\n\nRecommended Observations:");
+			while(result.next()){
+	        	for(ObservationType ot: Main.all_observation_types){
+	        		if(ot.getId() == result.getInt(1) && ot.getSubTypeId() == result.getInt(2)){
+	        			String diagnosis_name = "";
+	        			String health_supporter_name = "";
+	        			for(Diagnosis d: this.diagnosis){
+	        				if(d.getId() == result.getInt(5)){
+	        					diagnosis_name = d.getName();
+	        				}
+	        			}
+	        			for(HealthSupporter hs:this.health_supporters){
+	        				if(hs.getId() == result.getInt(3))
+	        					health_supporter_name = hs.getName();
+	        			}
+	        			String tail_output = "";
+	        			if(result.getString(6) != null)
+	        				tail_output += "\n Lower limit: "+ result.getString(6);
+	        			if(result.getString(7) != null)
+	        				tail_output += "\n Upper limit: "+ result.getString(7);
+	        			if(result.getBoolean(9))
+	        				tail_output += "\n Status: Mandatory";
+	        			else
+	        				tail_output += "\n Status: Optional";
+	        			
+	        			System.out.println("\nName:  "+ ot.getName()+ "\nDescription:  " + ot.getDesc()+
+	        					"\nDiagnosis: "+ diagnosis_name + "\nAssigned by:  "+ health_supporter_name + 
+	        					"\nRequired from:  " + result.getDate(8).toString() + "\nFrequency:  " 
+	        					+ result.getInt(10) + " days" + tail_output);
+	        		}
+	        	}
+	        	
+	        }
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }
