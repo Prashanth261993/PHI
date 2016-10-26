@@ -475,8 +475,11 @@ public class Main {
 					d.setId(result.getInt(1));
 					d.setName(result.getString(2));
 					d.setDesc(result.getString(3));
-					diagnosis.add(d);
-					System.out.println(d.desc);
+					if(d.id != 0){
+						//Only add and display diagnosis whose ID is not zero.
+						diagnosis.add(d);
+						System.out.println(d.desc);
+					}					
 				}
 			}
 		}catch(Exception e){
@@ -693,36 +696,7 @@ public class Main {
 				e.printStackTrace();
 			}
 		}				
-	}
-
-	private static void getPatientDiagnosis(Connection connection) {
-		pat_diagnosis = new ArrayList<>();
-		try{
-			Statement statement = connection.createStatement();
-			String query = "select d.id,d.name,d.description from user_info u,patient p,patient_diagnosis pd, diagnosis d where u.id = " + user_info.getId() + " and p.user_id = u.id and pd.p_id = p.id and pd.d_id = d.id";
-			ResultSet result = statement.executeQuery(query);
-
-			if(!result.isBeforeFirst()){
-				System.out.println("\nPatient category: Well");
-				System.out.println("No diagnosis found.");
-			} else{
-				System.out.println("\nPatient category: Sick");
-				System.out.println("List of diagnosis: ");
-
-				while(result.next()){
-					Diagnosis d = new Diagnosis();
-					d.setId(result.getInt(1));
-					d.setName(result.getString(2));
-					d.setDesc(result.getString(3));
-					pat_diagnosis.add(d);
-
-					System.out.println("Diagnosis Name: " + d.getName() + " , Diagnosis Description: " + d.getDesc());
-				}
-			}	
-		} catch(Exception e){
-			e.printStackTrace();
-		}
-	}
+	}	
 
 	private static void updatePatientHealthSupporters(Connection connection, int id) {
 		pat_hs = new ArrayList<>();
