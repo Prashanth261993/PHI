@@ -769,43 +769,101 @@ public class Main {
 		System.out.println("Alerts: \n");
 		Statement statement = conn.createStatement();
 		int i=1;
-		System.out.println("Alert Date \t Observation Type");
-		ResultSet rs = statement.executeQuery("select * from alerts inner join observation_type using (observation_type_id) inner join observation_sub_type using (observation_type_id,obs_subtype_id) where patient_id = '" + patient.getId() + "' and isCleared = false order by alert_date");
+		System.out.println("   Alert ID \tAlert Date \t Observation Type \t Alert Type");
+		ResultSet rs = statement.executeQuery("select * from alerts inner join observation_type using (observation_type_id) where patient_id = '" + patient.getId() + "' order by alert_date");
 		while(rs.next())
 		{
+			Integer alertId = rs.getInt("id");
 			Date alertDate = rs.getDate("alerts.alert_date");
 			String observationName = rs.getString("observation_type.name");
+			String alertType = rs.getString("type");
 			
-			System.out.print(i++ + ". " + alertDate + " \t " + observationName);
+			System.out.println(i++ + ". " + alertId + "\t\t" + alertDate + " \t " + observationName + " \t \t " + alertType);		
+		}
+		System.out.println();
+		System.out.println("Do you want to clear any alert? (y/n): ");
+		String input = sc.nextLine();
+		if(input.equals("y") || input.equals("Y")){
+			Statement clearStatement = conn.createStatement();
+			int count = 0;
+			rs = clearStatement.executeQuery("select * from alerts inner join observation_type using (observation_type_id) where patient_id = '" + patient.getId() + "' and alerts.type != 'Low Activity' order by alert_date");
+			while(rs.next())
+			{
+				if(count==0){
+					System.out.print("Choose the Alert ID(or multiple comma seperated) of the alert(s) that you want cleared: ");
+					System.out.println("\n   Alert ID \tAlert Date \t Observation Type \t Alert Type");
+				}
+				
+				Integer alertId = rs.getInt("id");
+				Date alertDate = rs.getDate("alerts.alert_date");
+				String observationName = rs.getString("observation_type.name");
+				String alertType = rs.getString("type");
+				
+				System.out.println(i++ + ". " + alertId + "\t\t" + alertDate + " \t " + observationName + " \t \t " + alertType);
+				count++;
+			}
+			if(count==0){
+				System.out.println("No alerts are available for you to clear.");
+				return;
+			}
+				
+			String clearAlert = sc.nextLine();
+			String[] alertNumbers = clearAlert.split(",");
+			StringBuilder sb = new StringBuilder();
+			for(String number : alertNumbers){
+				sb.append(number).append(',');
+			}
+			sb.deleteCharAt(sb.length()-1);
+			Statement deleteStatement = conn.createStatement();
+			String query = "delete from alerts where type <> 'Low Activity' and id in (" + sb.toString() + " )";
+			deleteStatement.executeUpdate(query);
+			
+			System.out.println("Alerts cleared. \n");
 			
 		}
+		statement.close();
 	}
 
 	private static void viewHSAlerts() throws SQLException{
 
 		System.out.println("Alerts: \n");
 		Statement statement = conn.createStatement();
-		int i=1;
-		System.out.println("Alert Date \t Observation Type \t Observation Sub-type  \t Description");
-		ResultSet rs = statement.executeQuery("select * from alerts inner join observation_type using (observation_type_id) inner join observation_sub_type using (observation_type_id,obs_subtype_id) where patient_id = '" + patient.getId() + "' and isCleared = false order by alert_date");
+		int i=1,count=0;
+		System.out.println("   Alert ID \tAlert Date \t Observation Type \t Alert Type");
+		ResultSet rs = statement.executeQuery("select * from alerts inner join observation_type using (observation_type_id) inner join hs_manages_patient on(alerts.patient_id = hs_manages_patient.p_id) where hs_manages_patient.hs_id = '" + patient.getId() + "' order by alert_date");
 		while(rs.next())
 		{
-			String description = rs.getString("alerts.description");
+			Integer alertId = rs.getInt("id");
 			Date alertDate = rs.getDate("alerts.alert_date");
 			String observationName = rs.getString("observation_type.name");
-			String subTypeName = rs.getString("observation_sub_type.name");
+			String alertType = rs.getString("type");
 			
-			
-			System.out.print(i++ + ". " + alertDate + " \t " + observationName);
-			
-			//This denotes that there are no specializations to the observation type
-			if(subTypeName.equals(observationName))
-				System.out.print(" \t \t \t \t ");
-			else
-				System.out.println(" \t \t \t " + subTypeName);
-			
-			System.out.println("\t " + description);
+			System.out.println(i++ + ". " + alertId + "\t\t" + alertDate + " \t " + observationName + " \t \t " + alertType);
+			count++;
 		}
+		System.out.println();
+		System.out.println("Do you want to clear any alert? (y/n): ");
+		String input = sc.nextLine();
+		if(input.equals("y") || input.equals("Y")){
+			if(count==0){
+				System.out.println("No Alerts to delete. Returning to Main Menu.");
+				return;
+			}
+			System.out.print("Choose the Alert ID(or multiple comma seperated) of the alert(s) that you want cleared: ");
+			String clearAlert = sc.nextLine();
+			String[] alertNumbers = clearAlert.split(",");
+			StringBuilder sb = new StringBuilder();
+			for(String number : alertNumbers){
+				sb.append(number).append(',');
+			}
+			sb.deleteCharAt(sb.length()-1);
+			Statement deleteStatement = conn.createStatement();
+			String query = "delete from alerts where id in (" + sb.toString() + " )";
+			deleteStatement.executeUpdate(query);
+			
+			System.out.println("Alerts cleared. \n");
+		}
+		statement.close();
 	}
 	
 	private static void loadObservationType(Connection c){
